@@ -25,7 +25,6 @@ const handler = NextAuth({
         captchaNum2: { label: "Captcha Num2", type: "number" },
       },
       async authorize(credentials, req) {
-        // console.log("Authorize Function Called");
         // console.log("Received Credentials:", credentials);
 
         if (

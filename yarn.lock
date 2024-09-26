@@ -200,6 +200,16 @@
   dependencies:
     "@radix-ui/react-primitive" "2.0.0"
 
+"@radix-ui/react-avatar@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-avatar/-/react-avatar-1.1.0.tgz#457c81334c93f4608df15f081e7baa286558d6a2"
+  integrity sha512-Q/PbuSMk/vyAd/UoIShVGZ7StHHeRFYU7wXmi5GV+8cLXflZAEpHL/F697H1klrzxKXNtZ97vWiC0q3RKUH8UA==
+  dependencies:
+    "@radix-ui/react-context" "1.1.0"
+    "@radix-ui/react-primitive" "2.0.0"
+    "@radix-ui/react-use-callback-ref" "1.1.0"
+    "@radix-ui/react-use-layout-effect" "1.1.0"
+
 "@radix-ui/react-collection@1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-collection/-/react-collection-1.1.0.tgz#f18af78e46454a2360d103c2251773028b7724ed"
@@ -350,16 +360,9 @@
     aria-hidden "^1.1.1"
     react-remove-scroll "2.5.7"
 
-"@radix-ui/react-slot@1.1.0":
+"@radix-ui/react-slot@1.1.0", "@radix-ui/react-slot@^1.1.0":
   version "1.1.0"
   resolved "https://registry.npmjs.org/@radix-ui/react-slot/-/react-slot-1.1.0.tgz"
-  integrity sha512-FUCf5XMfmW4dtYl69pdS4DbxKy8nj4M7SafBgPllysxmdachynNflAdp/gCsnYWNDnge6tI9onzMp5ARYc1KNw==
-  dependencies:
-    "@radix-ui/react-compose-refs" "1.1.0"
-
-"@radix-ui/react-slot@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@radix-ui/react-slot/-/react-slot-1.1.0.tgz#7c5e48c36ef5496d97b08f1357bb26ed7c714b84"
   integrity sha512-FUCf5XMfmW4dtYl69pdS4DbxKy8nj4M7SafBgPllysxmdachynNflAdp/gCsnYWNDnge6tI9onzMp5ARYc1KNw==
   dependencies:
     "@radix-ui/react-compose-refs" "1.1.0"
@@ -869,21 +872,27 @@ jose@^4.15.5, jose@^4.15.9:
   version "0.1.0"
   dependencies:
     "@hookform/resolvers" "^3.9.0"
+    "@radix-ui/react-alert-dialog" "^1.1.1"
+    "@radix-ui/react-dialog" "^1.1.1"
     "@radix-ui/react-label" "^2.1.0"
+    "@radix-ui/react-select" "^2.1.1"
     "@radix-ui/react-slot" "^1.1.0"
     axios "^1.7.7"
     class-variance-authority "^0.7.0"
     clsx "^2.1.1"
+    date-fns "^4.1.0"
     framer-motion "^11.8.0"
-    library-ni-pritz "file:../../../Users/Giann/AppData/Local/Yarn/Cache/v6/npm-library-ni-pritz-0.1.0-388d4e8b-999e-4225-8520-02a395c6f797-1727357656829/node_modules/library-ni-pritz"
+    library-ni-pritz "file:../../../Users/Giann/AppData/Local/Yarn/Cache/v6/npm-library-ni-pritz-0.1.0-e503251c-bf46-46c7-a6d2-aa312e9a1043-1727362420340/node_modules/library-ni-pritz"
     lucide-react "^0.446.0"
     next "14.2.13"
     next-auth "^4.24.8"
     react "^18"
+    react-day-picker "8.10.1"
     react-dom "^18"
     react-hook-form "^7.53.0"
     tailwind-merge "^2.5.2"
     tailwindcss-animate "^1.0.7"
+    vaul "^0.9.9"
     zod "^3.23.8"
 
 lilconfig@^2.1.0:
