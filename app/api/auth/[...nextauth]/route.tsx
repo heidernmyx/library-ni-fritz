@@ -70,9 +70,7 @@ const handler = NextAuth({
             email: Email,
             usertype: UserType,
           };
-
           console.log("Authenticated User:", user);
-
           if (user) {
             return user;
           } else {
@@ -102,16 +100,11 @@ const handler = NextAuth({
         session.user.email = token.email!;
         session.user.usertype = token.usertype as string;
       }
-    async session({ session, token, user }) {
-      session.user.id = token.id;
-      session.user.name = token.name;
-      session.user.email = token.email!;
-      session.user.usertype = String(token.usertype);
       return session;
     },
   },
   pages: {
-    signIn: "/login", // Customize the sign-in page if needed
+    signIn: "/auth/signin", // Customize the sign-in page if needed
   },
 });
 

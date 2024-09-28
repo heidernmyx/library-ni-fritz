@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Progress } from "@/components/ui/progress"
 
-
 const EntryPoint = () => {
   const { data: session, status} = useSession();
   const router = useRouter();
