@@ -1,13 +1,15 @@
-// import NextAuth from "next-auth";
+// types.d.ts
+
+import "next-auth";
 import "next-auth/jwt";
 
 declare module "next-auth" {
   interface Session {
     user: {
-      id: number;
+      id: number; // Ensure this is of the correct type
       name: string;
       email: string;
-      usertype: string
+      usertype: string; // Ensure this is included
     };
   }
 
@@ -15,13 +17,16 @@ declare module "next-auth" {
     id: number;
     name: string;
     email: string;
-    usertype: string
+    usertype: string; // Ensure this is included
   }
 }
+
 
 declare module "next-auth/jwt" {
   interface JWT {
     id: number;
     name: string;
+    email: string;
+    usertype: string;
   }
 }

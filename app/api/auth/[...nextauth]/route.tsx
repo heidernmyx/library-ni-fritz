@@ -56,13 +56,11 @@ const handler = NextAuth({
         formData.append("json", JSON.stringify(data));
         formData.append("operation", "getUser");
 
-        try {
           const response = await axios({
             url: `${process.env.NEXT_PUBLIC_URL}/php/users.php`,
             method: "POST",
             data: formData,
           });
-
           const { UserID, Name, UserType, Email } = response.data;
           const user: User = {
             id: UserID,
@@ -70,16 +68,16 @@ const handler = NextAuth({
             email: Email,
             usertype: UserType,
           };
-          console.log("Authenticated User:", user);
           if (user) {
             return user;
           } else {
-            throw new Error("Invalid credentials.");
+            return null
+            // throw new Error("Invalid credentials.");
           }
-        } catch (error) {
-          console.error("Authentication error:", error);
-          throw new Error("Authentication failed.");
-        }
+          // console.error("Authentication error:", error);
+
+        // throw new Error("Authentication failed.");
+
       },
     }),
   ],
@@ -97,12 +95,13 @@ const handler = NextAuth({
       if (token) {
         session.user.id = token.id;
         session.user.name = token.name;
-        session.user.email = token.email!;
-        session.user.usertype = token.usertype as string;
+        session.user.email = token.email;
+        session.user.usertype = token.usertype;
       }
       return session;
     },
   },
+  
   pages: {
     signIn: "/auth/signin", // Customize the sign-in page if needed
   },

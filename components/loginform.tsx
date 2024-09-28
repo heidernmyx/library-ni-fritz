@@ -21,8 +21,8 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
 const formFieldSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z
-    .string()
-    .min(8, { message: "Password must be at least 6 characters long." }),
+    .string(),
+    // .min(8, { message: "Password must be at least 6 characters long." }),
   captchaAnswer: z
     .preprocess((val) => Number(val), z.number().int().positive())
     .refine((val) => !isNaN(val), {

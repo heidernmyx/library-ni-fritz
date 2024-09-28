@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { getServerSession } from "next-auth";
 import { BookSearchComponent } from "@/components/book-search";
 import { BookTableGrid } from "@/components/bookTableGrid";
 
@@ -26,8 +25,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession();
-  console.log(session);
   return (
     <html lang="en">
       <body
