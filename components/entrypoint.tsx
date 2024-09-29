@@ -9,7 +9,6 @@ const EntryPoint = () => {
   const { data: session, status} = useSession();
   const router = useRouter();
   const [progress, setProgress] = useState(13)
-  
 
   console.log("yaw ng a sesion",session)
 
@@ -18,15 +17,13 @@ const EntryPoint = () => {
     clearTimeout(timer)
     if (session) {
       alert(true)
-      console.log(" user: ",session.user)
+      console.log(" bullshit: ",session.user)
       router.push('/dashboard')
     }
-    else {
+    else if (!session) {
       router.push('/auth/signin')
     }
   }, [session, status])
-
-  
 
   return (
     <div className='min-h-screen flex justify-center items-center'>

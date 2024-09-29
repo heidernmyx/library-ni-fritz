@@ -1,8 +1,10 @@
-import NextAuth, { User } from "next-auth";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
+import { NextAuthOptions } from "next-auth";
+import { User } from "next-auth";
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
@@ -26,7 +28,7 @@ const handler = NextAuth({
       },
       async authorize(credentials, req) {
         // console.log("Received Credentials:", credentials);
-
+  
         if (
           !credentials?.captchaAnswer ||
           !credentials?.captchaNum1 ||
@@ -34,50 +36,48 @@ const handler = NextAuth({
         ) {
           throw new Error("Captcha is required.");
         }
-
+  
         const { captchaAnswer, captchaNum1, captchaNum2 } = credentials;
-
-        console.log("Captcha Numbers Received:", captchaNum1, captchaNum2);
-        console.log("Captcha Answer Provided:", captchaAnswer);
-
+  
+        // console.log("Captcha Numbers Received:", captchaNum1, captchaNum2);
+        // console.log("Captcha Answer Provided:", captchaAnswer);
+  
         const expectedAnswer = Number(captchaNum1) + Number(captchaNum2);
-
-        console.log("Expected Captcha Answer:", expectedAnswer);
-
+  
+        // console.log("Expected Captcha Answer:", expectedAnswer);
+  
         if (Number(captchaAnswer) !== expectedAnswer) {
           throw new Error("Incorrect captcha answer.");
         }
-
+  
         const data = {
           email: credentials.email,
           password: credentials.password,
         };
         const formData = new FormData();
         formData.append("json", JSON.stringify(data));
-        formData.append("operation", "getUser");
-
+        formData.append("operation", "login");
+  
           const response = await axios({
-            url: `${process.env.NEXT_PUBLIC_URL}/php/users.php`,
+            url: `${process.env.NEXT_PUBLIC_API_URL}/users.php`,
             method: "POST",
             data: formData,
           });
-          const { UserID, Name, UserType, Email } = response.data;
+  
+          console.log("respose data is: ", response.data);
+          const { user_id, name, role } = response.data.user;
           const user: User = {
-            id: UserID,
-            name: Name,
-            email: Email,
-            usertype: UserType,
+            id: user_id,
+            name: name,
+            usertype: role,
           };
           if (user) {
+            console.log("USER: ", user)
             return user;
           } else {
             return null
             // throw new Error("Invalid credentials.");
           }
-          // console.error("Authentication error:", error);
-
-        // throw new Error("Authentication failed.");
-
       },
     }),
   ],
@@ -86,25 +86,34 @@ const handler = NextAuth({
       if (user) {
         token.id = Number(user.id);
         token.name = user.name;
-        token.email = user.email;
         token.usertype = user.usertype;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
+        console.log("true", true)
         session.user.id = token.id;
         session.user.name = token.name;
-        session.user.email = token.email;
         session.user.usertype = token.usertype;
       }
+      console.log("session is: ", session)
       return session;
     },
   },
-  
   pages: {
-    signIn: "/auth/signin", // Customize the sign-in page if needed
+    signIn: "/auth/login",
   },
-});
+};
 
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
+
+
+
+
+
+
+
+
+

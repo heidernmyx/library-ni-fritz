@@ -35,7 +35,7 @@ export function BookTableGrid() {
     setError(null);
     try {
       const offset = (currentPage - 1) * booksPerPage;
-      const url = `${process.env.NEXT_PUBLIC_URL}/php/books.php?action=fetch&limit=${booksPerPage}&offset=${offset}`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/php/books.php?action=fetch&limit=${booksPerPage}&offset=${offset}`;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch books.");

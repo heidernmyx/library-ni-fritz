@@ -41,7 +41,7 @@ export function BookSearchComponent() {
     setError(null);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL}/php/books.php?action=fetch`
+        `${process.env.NEXT_PUBLIC_API_URL}/php/books.php?action=fetch`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch books.");

@@ -1,9 +1,46 @@
-import React from 'react'
+"use client";
+import { Session } from 'next-auth';
+import { SessionProvider, useSession } from 'next-auth/react';
+import React, { useEffect, useState } from 'react';
 
 const Dashboard = () => {
+  const [sessionData, setSessionData] = useState<Session>(); 
+  // const { data: session } = useSession();
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const response = await fetch('/api/getSession');
+        if (!response.ok) {
+          throw new Error('Failed to fetch session');
+        }
+        console.log(response)
+        const data = await response.json();
+        console.log(data);
+        setSessionData(data.session); // Set fetched session data
+      } catch (error) {
+        console.error("Error fetching session:", error);
+      }
+    };
+
+    fetchSession();
+  }, []);
+  console.log("ang session: ", sessionData?.user)
+  // Use either the fetched sessionData or the session from useSession
+  // const userType = sessionData?.user? || session?.user;
+
   return (
-    <div>Dashboard</div>
-  )
+    <div>
+      {sessionData ? (
+        <>
+        <p>User Type: {sessionData.user.id}</p>
+        <p>User Type: {sessionData.user.name}</p>
+        <p>User Type: {sessionData.user.usertype}</p></>
+      ) : (
+        <p>Loading...</p>
+      )}
+    </div>
+  );
 }
 
-export default Dashboard
+export default Dashboard;

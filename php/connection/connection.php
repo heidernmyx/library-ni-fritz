@@ -1,5 +1,4 @@
 <?php
-// backend/db.php
 
 $host = 'localhost';
 $db   = 'library_database';

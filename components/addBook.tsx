@@ -82,7 +82,7 @@ export function AddBookComponent() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL}/php/books.php?action=add`,
+        `${process.env.NEXT_PUBLIC_API_URL}/php/books.php?action=add`,
         {
           method: "POST",
           headers: {
