@@ -14,9 +14,7 @@ const Dashboard = () => {
         if (!response.ok) {
           throw new Error('Failed to fetch session');
         }
-        console.log(response)
         const data = await response.json();
-        console.log(data);
         setSessionData(data.session); // Set fetched session data
       } catch (error) {
         console.error("Error fetching session:", error);
@@ -25,7 +23,6 @@ const Dashboard = () => {
 
     fetchSession();
   }, []);
-  console.log("ang session: ", sessionData?.user)
   // Use either the fetched sessionData or the session from useSession
   // const userType = sessionData?.user? || session?.user;
 

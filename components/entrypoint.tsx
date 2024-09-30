@@ -10,14 +10,12 @@ const EntryPoint = () => {
   const router = useRouter();
   const [progress, setProgress] = useState(13)
 
-  console.log("yaw ng a sesion",session)
 
   useEffect(() => {
     const timer = setTimeout(() => setProgress(66), 500)
     clearTimeout(timer)
     if (session) {
       alert(true)
-      console.log(" bullshit: ",session.user)
       router.push('/dashboard')
     }
     else if (!session) {

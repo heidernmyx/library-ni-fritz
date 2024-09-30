@@ -64,7 +64,6 @@ export const authOptions: NextAuthOptions = {
             data: formData,
           });
   
-          console.log("respose data is: ", response.data);
           const { user_id, name, role } = response.data.user;
           const user: User = {
             id: user_id,
@@ -72,7 +71,6 @@ export const authOptions: NextAuthOptions = {
             usertype: role,
           };
           if (user) {
-            console.log("USER: ", user)
             return user;
           } else {
             return null
@@ -92,13 +90,19 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token) {
-        console.log("true", true)
         session.user.id = token.id;
         session.user.name = token.name;
         session.user.usertype = token.usertype;
       }
-      console.log("session is: ", session)
       return session;
+    },
+    async redirect({ url, baseUrl, token }) {
+      // Redirect based on usertype
+      if (token?.usertype === "Admin") {
+        return `${baseUrl}/admin_dashboard`;
+      } else {
+        return `${baseUrl}/dashboard`;
+      }
     },
   },
   pages: {

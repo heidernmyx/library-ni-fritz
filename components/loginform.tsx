@@ -104,7 +104,7 @@ const LoginForm = () => {
         generateCaptcha();
         resetField("captchaAnswer");
       } else {
-        console.log("Login successful");
+        window.location.reload();
         // TODO Handle successful login diri
       }
     } catch (err) {
