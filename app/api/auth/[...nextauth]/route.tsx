@@ -28,7 +28,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         // console.log("Received Credentials:", credentials);
-  
+
         if (
           !credentials?.captchaAnswer ||
           !credentials?.captchaNum1 ||
@@ -36,20 +36,20 @@ export const authOptions: NextAuthOptions = {
         ) {
           throw new Error("Captcha is required.");
         }
-  
+
         const { captchaAnswer, captchaNum1, captchaNum2 } = credentials;
-  
+
         // console.log("Captcha Numbers Received:", captchaNum1, captchaNum2);
         // console.log("Captcha Answer Provided:", captchaAnswer);
-  
+
         const expectedAnswer = Number(captchaNum1) + Number(captchaNum2);
-  
+
         // console.log("Expected Captcha Answer:", expectedAnswer);
-  
+
         if (Number(captchaAnswer) !== expectedAnswer) {
           throw new Error("Incorrect captcha answer.");
         }
-  
+
         const data = {
           email: credentials.email,
           password: credentials.password,
@@ -57,25 +57,26 @@ export const authOptions: NextAuthOptions = {
         const formData = new FormData();
         formData.append("json", JSON.stringify(data));
         formData.append("operation", "login");
-  
-          const response = await axios({
-            url: `${process.env.NEXT_PUBLIC_API_URL}/users.php`,
-            method: "POST",
-            data: formData,
-          });
-  
-          const { user_id, name, role } = response.data.user;
-          const user: User = {
-            id: user_id,
-            name: name,
-            usertype: role,
-          };
-          if (user) {
-            return user;
-          } else {
-            return null
-            // throw new Error("Invalid credentials.");
-          }
+
+        const response = await axios({
+          url: `${process.env.NEXT_PUBLIC_API_URL}/users.php`,
+          method: "POST",
+          data: formData,
+        });
+
+        const { user_id, name, role, email } = response.data.user;
+        const user: User = {
+          id: user_id,
+          name: name,
+          usertype: role,
+          email: email,
+        };
+        if (user) {
+          return user;
+        } else {
+          return null;
+          // throw new Error("Invalid credentials.");
+        }
       },
     }),
   ],
@@ -112,12 +113,3 @@ export const authOptions: NextAuthOptions = {
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
-
-
-
-
-
-
-
-
-

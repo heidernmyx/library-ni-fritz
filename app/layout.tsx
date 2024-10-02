@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { BookSearchComponent } from "@/components/book-search";
-import { BookTableGrid } from "@/components/bookTableGrid";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,9 +29,10 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* <BookSearchComponent />
-        <BookTableGrid /> */}
-        {children}
+        <div>
+          <main>{children}</main>
+          <Toaster />
+        </div>
       </body>
     </html>
   );

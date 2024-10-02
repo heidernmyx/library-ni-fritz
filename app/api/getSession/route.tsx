@@ -5,6 +5,5 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Adjust the 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions); // Use authOptions
 
-
   return NextResponse.json({ session });
 }
