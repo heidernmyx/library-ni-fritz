@@ -265,7 +265,7 @@ export default function BookProvidersManager() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuItem onClick={() => handleEdit(provider)}>
-                      Edit
+                      Edits
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => handleDelete(provider)}>
