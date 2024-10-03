@@ -76,7 +76,7 @@ export function BookTableGrid() {
         </div>
       )}
       {books.length > 0 && (
-        <>
+        <div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 absolute top-full left-0 w-full mt-2 bg-white border border-gray-300 rounded shadow-lg z-10 p-4 max-h-96 overflow-y-auto">
             {books.map((book) => (
               <BookCardComponent
@@ -111,7 +111,7 @@ export function BookTableGrid() {
               Next
             </Button>
           </div>
-        </>
+        <div/>
       )}
       {!isLoading && books.length === 0 && (
         <div className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-300 rounded shadow-lg z-10 p-4">
