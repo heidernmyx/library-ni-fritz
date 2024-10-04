@@ -4,7 +4,6 @@ import React from "react";
 const BookManage = () => {
   return (
     <div>
-      ughss
       <BookLibrary />
     </div>
   );
