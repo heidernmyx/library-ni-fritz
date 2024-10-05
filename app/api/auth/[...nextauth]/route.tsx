@@ -97,14 +97,17 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async redirect({ url, baseUrl, token }) {
-      // Redirect based on usertype
-      if (token?.usertype === "Admin") {
-        return `${baseUrl}/admin_dashboard`;
-      } else {
-        return `${baseUrl}/dashboard`;
-      }
-    },
+    // async redirect({ url, baseUrl, token }) {
+    //   // Redirect based on usertype
+    //   if (token?.usertype === "Admin") {
+    //     return `${baseUrl}/admin_dashboard`;
+    //   } else {
+    //     return `${baseUrl}/dashboard`;
+    //   }
+    // },
+    async redirect( {}) {
+      
+    }
   },
   pages: {
     signIn: "/auth/login",

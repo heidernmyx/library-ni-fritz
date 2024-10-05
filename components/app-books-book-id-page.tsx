@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 
 //!mao ni dire gi gawas ang getBook function sa BookPage component
 
+
 async function getBook(bookId: string) {
   const res = await fetch(`https://localhost/books/${bookId}`, {
     cache: "no-store",

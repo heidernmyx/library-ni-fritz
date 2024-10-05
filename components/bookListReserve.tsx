@@ -53,20 +53,21 @@ const BookListReserve = () => {
 
   const reserveBook = async (userId: any, bookId: any) => {
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
-        {
-          operation: "reserveBook",
-          json: {
-            user_id: userId,
-            book_id: bookId,
-          },
-        },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      alert("Book reserved successfully");
+      const _data = {user_id: userId, book_id: bookId};
+      const formData = new FormData();
+      formData.append('operation', 'reserveBook');
+      formData.append('json', JSON.stringify(_data));
+
+      const response = await axios({
+        url: `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        method: "post",
+        data: formData,
+      })
+      
+        // { headers: { "Content-Type": "application/json" } }
+      // alert("Book reserved successfully");
       console.log(response.data);
-      alert(response.data);
+      // alert(response.data);
     } catch (error) {
       alert(error);
       console.error("Error reserving book:", error);

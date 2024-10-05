@@ -107,11 +107,14 @@ export default function BookLibrary() {
 
   const fetchGenres = async () => {
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
-        { operation: "fetchGenres" },
-        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-      );
+      // const formData = new FormData();
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/books.php`, {
+        params: {
+          operation: "fetchGenres",
+        },
+      });
+        // { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+      
       setGenres(response.data);
     } catch (error) {
       toast({
@@ -286,10 +289,11 @@ export default function BookLibrary() {
 
   return (
     <div className="flex flex-col flex-1 mx-auto p-4 min-h-screen w-[90vw] max-w-7xl">
-      <div className="flex ">
+      <div className="flex justify-between">
         <h1 className="text-4xl font-extrabold mb-8 text-center text-primary">
           Book Library
         </h1>
+        <Input className="w-[17vw] text-lg" placeholder="Search book..." type="text" />
       </div>
       <div className="fixed bottom-3 right-8 z-50">
         <AlertDialog>
