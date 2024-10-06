@@ -1,11 +1,11 @@
-import { useState} from 'react';
+// import { useState} from 'react';
 
-export const useSearch = () => {
+// export const useSearch = () => {
 
-  const [ search, setSearch] = useState<string>('');
+//   const [ search, setSearch] = useState<string>('');
   
-  const = (e: React.ChangeEvent<HTMLInputElement>) => {
+//   const = (e: React.ChangeEvent<HTMLInputElement>) => {
 
-    setSearch(e.target.value);
-  }
-}
+//     setSearch(e.target.value);
+//   }
+// }
