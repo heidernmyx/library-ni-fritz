@@ -30,8 +30,8 @@ const Dashboard = () => {
     <div>
       {sessionData ? (
         <>
-        <p>User Type: {sessionData.user.id}</p>
-        <p>User Type: {sessionData.user.name}</p>
+        <p>User ID: {sessionData.user.id}</p>
+        <p>User Name: {sessionData.user.name}</p>
         <p>User Type: {sessionData.user.usertype}</p></>
       ) : (
         <p>Loading...</p>
