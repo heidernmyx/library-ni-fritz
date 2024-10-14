@@ -29,15 +29,6 @@ const Dashboard = () => {
 
   return (
     <React.Fragment>
-      {/* {sessionData ? (
-        <>
-          <p>User ID: {sessionData.user.id}</p>
-          <p>User Name: {sessionData.user.name}</p>
-          <p>User Type: {sessionData.user.usertype}</p>
-        </>
-      ) : (
-        <p>Loading...</p>
-      )} */}
       <div className="flex flex-col">
         <BookListReserve />
       </div>

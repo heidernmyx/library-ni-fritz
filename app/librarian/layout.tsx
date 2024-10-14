@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BookOpen, Users, BarChart, Settings } from "lucide-react";
+import { BookOpen, Users, BarChart, Settings, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Drawer,
@@ -24,7 +24,7 @@ const navItems = [
   { href: "/librarian/books", label: "Manage Books", icon: BookOpen },
   { href: "/librarian/users", label: "Manage Users", icon: Users },
   { href: "/librarian/reports", label: "Reports", icon: BarChart },
-  { href: "/librarian/settings", label: "Settings", icon: Settings },
+  { href: "/librarian/reserved", label: "Reserved Book", icon: Calendar },
 ];
 
 export default function LibrarianLayout({

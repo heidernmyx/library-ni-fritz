@@ -73,7 +73,7 @@ export default function BookListReserve() {
         data: formData,
       });
 
-      alert(response.data);
+      // alert(response.data);
       console.log(response.data);
     } catch (error) {
       console.log(error);

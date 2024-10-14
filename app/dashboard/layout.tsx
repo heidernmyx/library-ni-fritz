@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Book, Calendar, Bell, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession, signOut } from "next-auth/react";
+import { Session } from "next-auth";
 import {
   Drawer,
   DrawerClose,
@@ -20,10 +21,10 @@ import {
 } from "@/components/ui/drawer";
 
 const navItems = [
-  { href: "/user", label: "Dashboard", icon: User },
-  { href: "/user/borrowed", label: "Borrowed", icon: Book },
-  { href: "/user/reservations", label: "Reservations", icon: Calendar },
-  { href: "/user/notifications", label: "Notifications", icon: Bell },
+  { href: "/dashboard", label: "Dashboard", icon: User },
+  { href: "/dashboard/borrowed", label: "Borrowed", icon: Book },
+  { href: "/dashboard/reservations", label: "Reservations", icon: Calendar },
+  { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
 ];
 
 export default function UserLayout({
@@ -34,7 +35,25 @@ export default function UserLayout({
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
+  const [sessionData, setSessionData] = useState<Session>();
+  // const { data: session } = useSession();
 
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const response = await fetch("/api/getSession");
+        if (!response.ok) {
+          throw new Error("Failed to fetch session");
+        }
+        const data = await response.json();
+        setSessionData(data.session); // Set fetched session data
+      } catch (error) {
+        console.error("Error fetching session:", error);
+      }
+    };
+
+    fetchSession();
+  }, []);
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -56,9 +75,14 @@ export default function UserLayout({
             transition={{ duration: 0.5, delay: 0.2 }}
             className="fixed top-8 flex justify-center items-center flex-1 w-full -translate-x-1/2 z-60 cursor-pointer"
           >
-            <Avatar className="h-10  w-10  ">
-              <AvatarImage src="/avatars/01.png" alt="User Avatar" />
-              <AvatarFallback className="bg-green-300">JD</AvatarFallback>
+            <Avatar className="h-10 w-10">
+              <AvatarImage
+                src={sessionData?.user?.image || "/avatars/01.png"}
+                alt="User Avatar"
+              />
+              <AvatarFallback className="bg-green-300">
+                {sessionData?.user?.name?.[0] || "JD"}
+              </AvatarFallback>
             </Avatar>
           </motion.div>
         </DrawerTrigger>
@@ -71,11 +95,20 @@ export default function UserLayout({
             {/* Profile Content */}
             <div className="flex flex-col items-center space-y-6 mt-6">
               <Avatar className="h-24 w-24">
-                <AvatarImage src="/avatars/01.png" alt="User Avatar" />
-                <AvatarFallback>JD</AvatarFallback>
+                <AvatarImage
+                  src={sessionData?.user?.image || "/avatars/01.png"}
+                  alt="User Avatar"
+                />
+                <AvatarFallback>
+                  {sessionData?.user?.name?.[0] || "JD"}
+                </AvatarFallback>
               </Avatar>
-              <h2 className="text-2xl font-semibold">John Doe</h2>
-              <p className="text-gray-600">johndoe@example.com</p>
+              <h2 className="text-2xl font-semibold">
+                {sessionData?.user?.name || "John Doe"}
+              </h2>
+              <p className="text-gray-600">
+                {sessionData?.user?.email || "johndoe@example.com"}
+              </p>
               <Link href="/user/profile">
                 <Button className="mt-4">View Profile</Button>
               </Link>

@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { getSession } from "next-auth/react";
@@ -7,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Book, Calendar, Hash, User } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 type ReservedBook = {
   ReservationID: number;
@@ -31,25 +30,29 @@ export default function ReservedBooks() {
     const fetchReservedBooks = async () => {
       try {
         const session = await getSession();
-        if (!session?.user?.id) {
-          setError("User not authenticated");
-          setLoading(false);
-          return;
-        }
-        // const _data = { user_id: session.user.id };
+        const userId = session?.user?.id || null; // Get user ID or set to null
+
         const formData = new FormData();
         formData.append("operation", "fetchReservedBooks");
-        // formData.append("json", JSON.stringify(_data));
+        if (userId) {
+          formData.append("userId", userId.toString()); // Only append userId if it exists
+        }
 
-        const response = await axios({
-          url: `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
-          method: "post",
-          data: formData,
-        });
-        setReservedBooks(response.data.reserved_books);
-      } catch (error) {
-        console.error("Error fetching reserved books:", error);
-        setError("Failed to fetch reserved books");
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+          formData
+        );
+
+        // Check if reserved_books exists and is an array
+        if (Array.isArray(response.data.reserved_books)) {
+          setReservedBooks(response.data.reserved_books);
+        } else {
+          setError("No reserved books found.");
+        }
+      } catch (err: any) {
+        setError(
+          err.response ? err.response.data.message : "An error occurred."
+        );
       } finally {
         setLoading(false);
       }
@@ -94,7 +97,7 @@ export default function ReservedBooks() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className=" mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Your Reserved Books</h1>
       {reservedBooks.length === 0 ? (
         <p className="text-center text-gray-500">You have no reserved books.</p>
@@ -138,7 +141,7 @@ export default function ReservedBooks() {
                     Provider: {book.ProviderName}
                   </p>
                 )}
-                <section className=" flex-1 flex w-full justify-center items-center p-4">
+                <section className="flex-1 flex w-full justify-center items-center p-4">
                   <Button>Pick up | Borrow Book</Button>
                 </section>
               </CardContent>
