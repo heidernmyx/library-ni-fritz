@@ -33,24 +33,16 @@ export default function LibrarianLayout({
   children: React.ReactNode;
 }) {
   const [hoveredNavIndex, setHoveredNavIndex] = useState<number | null>(null);
-  //   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
-
-  //   useEffect(() => {
-  //     const checkMobile = () => setIsMobile(window.innerWidth < 768);
-  //     checkMobile();
-  //     window.addEventListener("resize", checkMobile);
-  //     return () => window.removeEventListener("resize", checkMobile);
-  //   }, []);
 
   const isAnyNavHovered = hoveredNavIndex !== null;
 
   return (
     <div className="flex min-h-screen bg-gray-400 relative">
       {/* Dynamic Islands Container */}
-      <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50 flex flex-col space-y-6">
+      <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50 flex flex-col space-y-4">
         {/* Navigation Dynamic Island */}
-        <div className="bg-white flex flex-col justify-center items-center gap-7 py-3 rounded-2xl shadow-lg">
+        <div className="bg-white flex flex-col justify-center items-center gap-4 py-2 rounded-xl shadow-lg">
           {navItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -59,15 +51,15 @@ export default function LibrarianLayout({
               <Link key={item.href} href={item.href}>
                 <motion.div
                   whileHover={{
-                    scale: 1.3,
-                    rotate: 10,
+                    scale: 1.2,
+                    rotate: 8,
                     transition: { type: "spring", stiffness: 300, damping: 10 },
                   }}
-                  whileTap={{ scale: 0.95 }}
+                  whileTap={{ scale: 0.9 }}
                   animate={
                     !isAnyNavHovered
                       ? {
-                          scale: [1, 1.05, 1],
+                          scale: [1, 1.03, 1],
                         }
                       : {}
                   }
@@ -88,7 +80,7 @@ export default function LibrarianLayout({
                   <Button
                     variant="ghost"
                     className={cn(
-                      "p-4 rounded-full transition-transform transform relative overflow-hidden",
+                      "p-2 rounded-full transition-transform transform relative overflow-hidden",
                       isActive
                         ? "bg-blue-500 text-white"
                         : "text-gray-700 hover:bg-gray-200"
@@ -102,7 +94,7 @@ export default function LibrarianLayout({
                       animate={{ opacity: isActive ? 1 : 0 }}
                       transition={{ duration: 0.3 }}
                     />
-                    <Icon className="h-8 w-8 relative z-10" />
+                    <Icon className="h-6 w-6 relative z-10" />
                   </Button>
 
                   {/* Floating Label */}
@@ -125,14 +117,14 @@ export default function LibrarianLayout({
           })}
         </div>
         {/* Profile Dynamic Island */}
-        <div className="mt-6">
+        <div className="mt-4">
           <Drawer>
             <DrawerTrigger asChild>
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex justify-center items-center rounded-full p-4 cursor-pointer relative overflow-hidden" // Fixed typo: added space
+                className="flex justify-center items-center rounded-full p-2 cursor-pointer relative overflow-hidden"
               >
                 {/* Animated Background */}
                 <motion.div
@@ -146,13 +138,13 @@ export default function LibrarianLayout({
                     ease: "easeInOut",
                   }}
                 />
-                <Avatar className="h-16 w-16 md:h-20 md:w-20 relative z-10">
+                <Avatar className="h-12 w-12 relative z-10">
                   <AvatarImage src="/avatars/01.png" alt="User Avatar" />
                   <AvatarFallback className="bg-green-300">JD</AvatarFallback>
                 </Avatar>
               </motion.div>
             </DrawerTrigger>
-            <DrawerContent className="w-full max-w-[600px]">
+            <DrawerContent className="w-full max-w-[400px]">
               <DrawerHeader>
                 <DrawerTitle>Profile</DrawerTitle>
                 <DrawerClose className="absolute top-4 right-4" />
@@ -160,7 +152,7 @@ export default function LibrarianLayout({
               <DrawerDescription>
                 {/* Profile Content */}
                 <div className="flex flex-col items-center space-y-6 mt-6">
-                  <Avatar className="h-24 w-24">
+                  <Avatar className="h-20 w-20">
                     <AvatarImage src="/avatars/01.png" alt="User Avatar" />
                     <AvatarFallback>JD</AvatarFallback>
                   </Avatar>
@@ -169,7 +161,11 @@ export default function LibrarianLayout({
                   <Link href="/librarian/profile">
                     <Button className="mt-4">View Profile</Button>
                   </Link>
-                  <Button onClick={() => signOut()} variant="destructive" className="mt-2">
+                  <Button
+                    onClick={() => signOut()}
+                    variant="destructive"
+                    className="mt-2"
+                  >
                     Logout
                   </Button>
                 </div>
@@ -180,11 +176,6 @@ export default function LibrarianLayout({
       </div>
 
       {/* Main Content */}
-      {/* <div className="flex-1 flex justify-center items-center h-screen flex-col border border-black border-solid">
-        <main className="flex flex-col justify-center items-center">
-          {children}
-        </main>
-      </div> */}
       <div className="flex-1 flex flex-col ">
         <main className="flex-1 p-6 flex flex-col justify-center items-center">
           {children}
