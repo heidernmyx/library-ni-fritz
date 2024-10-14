@@ -22,7 +22,7 @@ function handlePublicRoutes(pathUrl: string, token: JWT | null, req: NextRequest
   if (token?.usertype === "Admin") {
     return NextResponse.redirect(new URL('/admin_dashboard', req.url));
   } else if (token?.usertype === "Librarian") {
-    return NextResponse.redirect(new URL('/librarian_dashboard', req.url));
+    return NextResponse.redirect(new URL('/librarian', req.url));
   } else if (token?.usertype === "User") {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   } else {
@@ -44,8 +44,9 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
   const isAdminRoute = /^\/admin_dashboard(.*)/.test(pathUrl);
-  const isProtectedRoute = /^\/dashboard(.*)/.test(pathUrl);
-  const isPublicRoute = ['/auth/signin'].includes(pathUrl);
+  const isProtectedRoute = /^\/(dashboard|librarian|admin_dashboard)(.*)/.test(pathUrl);
+
+  const isPublicRoute = ['/auth/signin', '/'].includes(pathUrl);
 
   if (isAdminRoute) {
     return handleAdminRoutes(pathUrl, token, req, referer);
@@ -58,4 +59,4 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
-export const config = { matcher: ["/", "/auth(.*)", "/dashboard(.*)", "/librarian_dashboard(.*)", "/admin_dashboard(.*)"] };
+export const config = { matcher: ["/", "/auth(.*)", "/dashboard(.*)", "/librarian(.*)", "/admin_dashboard(.*)"] };

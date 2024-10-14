@@ -18,6 +18,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { getSession, signOut } from "next-auth/react";
 
 const navItems = [
   { href: "/librarian/books", label: "Manage Books", icon: BookOpen },
@@ -168,7 +169,7 @@ export default function LibrarianLayout({
                   <Link href="/librarian/profile">
                     <Button className="mt-4">View Profile</Button>
                   </Link>
-                  <Button variant="destructive" className="mt-2">
+                  <Button onClick={() => signOut()} variant="destructive" className="mt-2">
                     Logout
                   </Button>
                 </div>
@@ -179,8 +180,13 @@ export default function LibrarianLayout({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex justify-center items-center h-screen flex-col">
+      {/* <div className="flex-1 flex justify-center items-center h-screen flex-col border border-black border-solid">
         <main className="flex flex-col justify-center items-center">
+          {children}
+        </main>
+      </div> */}
+      <div className="flex-1 flex flex-col ">
+        <main className="flex-1 p-6 flex flex-col justify-center items-center">
           {children}
         </main>
       </div>
