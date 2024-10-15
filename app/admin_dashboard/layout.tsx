@@ -6,7 +6,16 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BookOpen, Users, BarChart, Settings, Package, X } from "lucide-react";
+import {
+  BookOpen,
+  Users,
+  BarChart,
+  Settings,
+  Package,
+  X,
+  Calendar,
+  BookCopy,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Drawer,
@@ -26,14 +35,19 @@ const navItems = [
   { href: "/admin_dashboard/users", label: "Manage Users", icon: Users },
   { href: "/admin_dashboard/reports", label: "System Reports", icon: BarChart },
   {
-    href: "/admin_dashboard/settings",
-    label: "System Settings",
-    icon: Settings,
+    href: "/admin_dashboard/reserved",
+    label: "Reserved Books",
+    icon: Calendar,
   },
   {
     href: "/admin_dashboard/book-provider",
     label: "Book Provider",
     icon: Package,
+  },
+  {
+    href: "/admin_dashboard/borrowed",
+    label: "Borrowed Books",
+    icon: BookCopy,
   },
 ];
 

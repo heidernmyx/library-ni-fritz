@@ -1,4 +1,4 @@
-import UsersReservedBooks from "@/components/user/usersReservedBooks";
+import UsersReservedBooks from "@/components/user/ReservedBooks";
 import React from "react";
 
 const page = () => {

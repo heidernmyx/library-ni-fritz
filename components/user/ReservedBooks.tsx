@@ -2,7 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, Book, Calendar, User } from "lucide-react";
@@ -14,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 interface Book {
   ReservationID: number;
@@ -37,7 +44,7 @@ interface Session {
   };
 }
 
-export default function UsersReservedBooks() {
+export default function ReservedBooks() {
   const [reservedBooks, setReservedBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,14 +69,17 @@ export default function UsersReservedBooks() {
 
   useEffect(() => {
     const fetchReservedBooks = async () => {
-      if (!sessionData?.user?.id) return;
-
+      if (!sessionData) return; // Wait for sessionData to load
       try {
         setLoading(true);
-        const _data = { user_id: sessionData.user.id };
         const formData = new FormData();
         formData.append("operation", "fetchReservedBooks");
-        formData.append("json", JSON.stringify(_data));
+
+        // Only add user_id if the user is a Registered User
+        if (sessionData.user.usertype === "Registered User") {
+          const _data = { user_id: sessionData.user.id };
+          formData.append("json", JSON.stringify(_data));
+        }
 
         const response = await axios({
           url: `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
@@ -96,6 +106,34 @@ export default function UsersReservedBooks() {
 
   const handleStatusChange = async (bookId: number, newStatus: string) => {
     console.log(`Changing status of book ${bookId} to ${newStatus}`);
+    // Implement the actual status change logic here
+  };
+
+  const handleBorrow = async (bookId: number) => {
+    console.log(`Borrowing book ${bookId}`);
+    // alert(sessionData?.user?.id);
+    // alert(`Borrowing book ${bookId}`);
+    try {
+      const formData = new FormData();
+      formData.append("operation", "borrowBook");
+      formData.append(
+        "json",
+        JSON.stringify({
+          user_id: sessionData?.user?.id,
+          reservation_id: reservedBooks[0].ReservationID,
+        })
+      );
+      const response = await axios({
+        url: `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        method: "post",
+        data: formData,
+      });
+      if (response.data.success) {
+        alert("Book borrowed successfully");
+      } else {
+        alert("Failed to borrow book");
+      }
+    } catch (error) {}
   };
 
   if (loading) {
@@ -190,6 +228,20 @@ export default function UsersReservedBooks() {
                   </div>
                 </ScrollArea>
               </CardContent>
+              <CardFooter>
+                {book.StatusName === "Available" ? (
+                  <Button
+                    onClick={() => handleBorrow(book.BookID)}
+                    className="w-full"
+                  >
+                    Borrow
+                  </Button>
+                ) : (
+                  <Button disabled className="w-full">
+                    Pending
+                  </Button>
+                )}
+              </CardFooter>
             </Card>
           ))}
         </div>
