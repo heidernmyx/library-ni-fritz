@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BookOpen, Users, BarChart, Settings, Calendar } from "lucide-react";
+import { BookOpen, Users, BarChart, Settings, Calendar, LucideTruck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Drawer,
@@ -22,6 +22,7 @@ import { getSession, signOut } from "next-auth/react";
 
 const navItems = [
   { href: "/librarian/books", label: "Manage Books", icon: BookOpen },
+  { href: "/librarian/book-provider", label: "Book Providers", icon: LucideTruck },
   { href: "/librarian/users", label: "Manage Users", icon: Users },
   { href: "/librarian/reports", label: "Reports", icon: BarChart },
   { href: "/librarian/reserved", label: "Reserved Book", icon: Calendar },
