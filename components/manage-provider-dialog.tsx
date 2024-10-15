@@ -6,17 +6,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BookProvider } from '@/lib/types/book-provider-types';
+import { updateProvider } from '@/lib/actions/book-provider';
+// import { useForm } from 'react-hook-form';
 
 interface ManageProviderDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (provider: BookProvider) => void;
+  onUpdate: (provider: BookProvider) => void;
   provider: BookProvider | null;
 }
 
-export default function ManageProviderDialog({ isOpen, onClose, onSave, provider }: ManageProviderDialogProps) {
+export default function ManageProviderDialog({ isOpen, onClose, onSave, onUpdate, provider }: ManageProviderDialogProps) {
   const [formData, setFormData] = useState<BookProvider>({
     ProviderID: 0,
+    ContactID: 0,
+    AddressID: 0,
     ProviderName: '',
     Phone: '',
     Email: '',
@@ -32,6 +37,9 @@ export default function ManageProviderDialog({ isOpen, onClose, onSave, provider
       setFormData(provider);
     } else {  
       setFormData({
+        ProviderID: 0,
+        ContactID: 0,
+        AddressID: 0,
         ProviderName: '',
         Phone: '',
         Email: '',
@@ -51,9 +59,17 @@ export default function ManageProviderDialog({ isOpen, onClose, onSave, provider
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
-  
+    if (provider) {
+      // const result = updateProvider(formData)
+      // alert(provider)  
+      onUpdate(formData)
+    }
+    else {
+      alert(true)
+      onSave(formData);
+    }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -151,7 +167,8 @@ export default function ManageProviderDialog({ isOpen, onClose, onSave, provider
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">Save</Button>
+            { provider ? <Button type="submit">Update</Button> : 
+            <Button type="submit">Add</Button>}
           </div>
         </form>
       </DialogContent>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ArrowUpDown } from 'lucide-react';
+import { PlusCircle, ArrowUpDown, MoreHorizontal } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -12,20 +12,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import ManageProviderDialog from '@/components/manage-provider-dialog';
-import { fetchProviders, addProvider } from '@/lib/actions/book-provider';
-
-export interface BookProvider {
-  ProviderID?: number;
-  ProviderName: string;
-  Phone: string;
-  Email: string;
-  Street: string;
-  City: string;
-  State: string;
-  Country: string;
-  PostalCode: string;
-}
-
+import { fetchProviders, addProvider, updateProvider } from '@/lib/actions/book-provider';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { BookProvider } from '@/lib/types/book-provider-types';
+import axios from "axios";
 
 type SortKey = keyof BookProvider;
 
@@ -40,12 +36,11 @@ export default function BookProvidersList() {
   const [selectedProvider, setSelectedProvider] = useState<BookProvider | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
 
-  const handleManage = (provider: BookProvider | null = null) => {
+  const handleManage =  async(provider: BookProvider | null = null) => {
     setSelectedProvider(provider);
     setIsManageDialogOpen(true);
   };
 
-  
 
   const handleSort = (key: SortKey) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -107,9 +102,26 @@ export default function BookProvidersList() {
                   {`${provider.Street}, ${provider.City}, ${provider.State} ${provider.PostalCode}, ${provider.Country}`}
                 </TableCell>
                 <TableCell>
-                  <Button variant="outline" size="sm" onClick={() => handleManage(provider)}>
+                  {/* <Button variant="outline" size="sm" >
                     Manage
-                  </Button>
+                  </Button> */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        aria-haspopup="true"
+                        size="icon"
+                        variant="ghost"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Toggle menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => handleManage(provider)}>Edit</DropdownMenuItem>
+                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
@@ -120,6 +132,7 @@ export default function BookProvidersList() {
         isOpen={isManageDialogOpen}
         onClose={() => setIsManageDialogOpen(false)}
         onSave={addProvider}
+        onUpdate = {updateProvider}
         provider={selectedProvider}
       />
     </div>
