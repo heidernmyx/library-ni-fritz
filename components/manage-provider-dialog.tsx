@@ -52,6 +52,7 @@ export default function ManageProviderDialog({ isOpen, onClose, onSave, provider
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
+  
   };
 
   return (
