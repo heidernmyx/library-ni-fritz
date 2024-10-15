@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, ArrowUpDown } from 'lucide-react';
 import {
@@ -12,6 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import ManageProviderDialog from '@/components/manage-provider-dialog';
+import { fetchProviders, addProvider } from '@/lib/actions/book-provider';
 
 export interface BookProvider {
   ProviderID?: number;
@@ -25,35 +26,16 @@ export interface BookProvider {
   PostalCode: string;
 }
 
-const initialProviders: BookProvider[] = [
-  {
-    ProviderID: 1,
-    ProviderName: 'Amazon Books',
-    Phone: '+1 (800) 123-4567',
-    Email: 'contact@amazon.com',
-    Street: '410 Terry Ave N',
-    City: 'Seattle',
-    State: 'WA',
-    Country: 'USA',
-    PostalCode: '98109'
-  },
-  {
-    ProviderID: 2,
-    ProviderName: 'Barnes & Noble',
-    Phone: '+1 (888) 987-6543',
-    Email: 'info@barnesandnoble.com',
-    Street: '122 Fifth Avenue',
-    City: 'New York',
-    State: 'NY',
-    Country: 'USA',
-    PostalCode: '10011'
-  },
-];
 
 type SortKey = keyof BookProvider;
 
 export default function BookProvidersList() {
-  const [providers, setProviders] = useState<BookProvider[]>(initialProviders);
+
+  useEffect(() => {
+    fetchProviders().then(setProviders);
+  }, [])
+
+  const [providers, setProviders] = useState<BookProvider[]>([]);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<BookProvider | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
@@ -63,15 +45,7 @@ export default function BookProvidersList() {
     setIsManageDialogOpen(true);
   };
 
-  const handleSaveProvider = (provider: BookProvider) => {
-    if (provider.ProviderID) {
-      setProviders(providers.map(p => p.ProviderID === provider.ProviderID ? provider : p));
-    } else {
-      const newProvider = { ...provider, ProviderID: Math.max(0, ...providers.map(p => p.ProviderID || 0)) + 1 };
-      setProviders([...providers, newProvider]);
-    }
-    setIsManageDialogOpen(false);
-  };
+  
 
   const handleSort = (key: SortKey) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -145,7 +119,7 @@ export default function BookProvidersList() {
       <ManageProviderDialog
         isOpen={isManageDialogOpen}
         onClose={() => setIsManageDialogOpen(false)}
-        onSave={handleSaveProvider}
+        onSave={addProvider}
         provider={selectedProvider}
       />
     </div>
