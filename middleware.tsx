@@ -31,6 +31,8 @@ function handlePublicRoutes(
   token: JWT | null,
   req: NextRequest
 ) {
+  console.log(true)
+  console.log("User type is: ", token?.usertype)
   if (token?.usertype === "Admin") {
     return NextResponse.redirect(new URL("/admin_dashboard", req.url));
   } else if (token?.usertype === "Librarian") {
@@ -38,13 +40,13 @@ function handlePublicRoutes(
   } else if (token?.usertype === "User") {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   } else {
-    // return NextResponse.next();
+    return NextResponse.next();
   }
 }
 
 export async function middleware(req: NextRequest) {
   const referer = req.headers.get("referer");
-
+  console.log("middleware ran")
   if (referer) {
     console.log("Previous URL:", referer);
   } else {
@@ -59,16 +61,18 @@ export async function middleware(req: NextRequest) {
     pathUrl
   );
 
-  const isPublicRoute = ["/auth/signin", "/"].includes(pathUrl);
+  // const isPublicRoute = ["/auth", "/"].includes(pathUrl);
+  const isPublicRoute = /^\/auth(.*)/.test(pathUrl) || pathUrl === "/";
+
 
   if (isAdminRoute) {
     return handleAdminRoutes(pathUrl, token, req, referer);
   } else if (isProtectedRoute) {
+    console.log(true)
     return handleProtectedRoutes(pathUrl, token, req);
   } else if (isPublicRoute) {
     return handlePublicRoutes(pathUrl, token, req);
   }
-
   return NextResponse.next();
 }
 
