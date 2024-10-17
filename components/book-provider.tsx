@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import ManageProviderDialog from '@/components/manage-provider-dialog';
 import { fetchProviders, addProvider, updateProvider } from '@/lib/actions/book-provider';
 import {
   DropdownMenu,
@@ -21,6 +20,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { BookProvider } from '@/lib/types/book-provider-types';
+import ManageProviderDialog from '@/components/manage-provider-dialog';
+import ViewProvidedBookDialog from './view-provided-book-dialog';
+import { handleViewDialog } from '@/lib/actions/book-provider'
 import axios from "axios";
 
 type SortKey = keyof BookProvider;
@@ -33,6 +35,7 @@ export default function BookProvidersList() {
 
   const [providers, setProviders] = useState<BookProvider[]>([]);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<BookProvider | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
 
@@ -40,6 +43,7 @@ export default function BookProvidersList() {
     setSelectedProvider(provider);
     setIsManageDialogOpen(true);
   };
+  
 
 
   const handleSort = (key: SortKey) => {
@@ -118,8 +122,9 @@ export default function BookProvidersList() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => {handleViewDialog(setIsViewDialogOpen), setSelectedProvider(provider)}}>View Provided Books</DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleManage(provider)}>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                      <DropdownMenuItem>Archive</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -133,6 +138,11 @@ export default function BookProvidersList() {
         onClose={() => setIsManageDialogOpen(false)}
         onSave={addProvider}
         onUpdate = {updateProvider}
+        provider={selectedProvider}
+      />
+      <ViewProvidedBookDialog 
+        isOpen={isViewDialogOpen} 
+        onClose={() => setIsViewDialogOpen(false)} 
         provider={selectedProvider}
       />
     </div>

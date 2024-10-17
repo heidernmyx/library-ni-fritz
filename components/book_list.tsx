@@ -160,7 +160,7 @@ export default function BookLibrary() {
     } catch (error) {
       toast({
         title: "Error",
-        description: error.message || "Failed to fetch books.",
+        description: (error as Error).message || "Failed to fetch books.",
         variant: "destructive",
       });
     } finally {

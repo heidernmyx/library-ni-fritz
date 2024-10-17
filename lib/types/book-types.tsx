@@ -13,6 +13,8 @@ export type BookFormField = {
 
 export type BookProvider = {
   ProviderID: number;
+  ContactID: number;
+  AddressID: number;
   ProviderName: string;
   Phone: string;
   Email: string;
@@ -22,6 +24,7 @@ export type BookProvider = {
   State: string;
   Street: string;
 };
+
 
 export type Book = {
   BookID: number;

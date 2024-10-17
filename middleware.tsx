@@ -46,7 +46,7 @@ function handlePublicRoutes(
 
 export async function middleware(req: NextRequest) {
   const referer = req.headers.get("referer");
-  console.log("middleware ran")
+  // console.log("middleware ran")
   if (referer) {
     console.log("Previous URL:", referer);
   } else {

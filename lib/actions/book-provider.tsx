@@ -19,10 +19,8 @@ export const addProvider = async (provider: BookProvider) => {
     method: "POST",
     data: formData
   })
-
   return response.data;
 };
-
 
 export const updateProvider = async (provider: BookProvider) => {
 
@@ -36,4 +34,12 @@ export const updateProvider = async (provider: BookProvider) => {
   });
 
   return response.data; 
+}
+
+export const handleViewDialog = (setIsViewDialogOpen: any) => {
+  return setIsViewDialogOpen(true);
+}
+
+export const fetchBooksProvided = async (providerID: number | null) => {
+
 }
