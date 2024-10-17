@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +15,7 @@ import {
   Calendar,
   BookCopy,
   BookCheck,
+  Bell, // Bell icon for notifications
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -28,7 +29,25 @@ import {
 } from "@/components/ui/drawer";
 import axios from "axios";
 
-import { getSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast"; // Ensure you have this hook
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Session } from "next-auth";
+
+// Define the type for notifications
+interface Notification {
+  NotificationID: number;
+  Message: string;
+  DateSent: string;
+  Status: "Unread" | "Read";
+}
 
 const navItems = [
   { href: "/admin_dashboard/books", label: "Manage Books", icon: BookOpen },
@@ -63,17 +82,157 @@ export default function AdminLayout({
 }) {
   const [hoveredNavIndex, setHoveredNavIndex] = useState<number | null>(null);
   const pathname = usePathname();
-  const [session, setSession] = useState<any>(null);
+  const [sessionData, setSessionData] = useState<Session>();
   const [isOpen, setIsOpen] = useState(false);
   const isAnyNavHovered = hoveredNavIndex !== null;
 
+  // Notification States
+  const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const hasFetchedNotifications = useRef(false);
+  const { toast } = useToast();
+
   useEffect(() => {
     const fetchSession = async () => {
-      const session = await getSession();
-      setSession(session);
+      try {
+        const response = await axios.get("/api/getSession");
+        const data = response.data;
+        setSessionData(data.session);
+        // alert(data.session);
+      } catch (error) {
+        console.error("Error fetching session:", error);
+      }
     };
+
     fetchSession();
   }, []);
+
+  useEffect(() => {
+    if (sessionData && sessionData.user) {
+      alert(sessionData.user.id);
+    }
+    fetchNotifications();
+  }, []);
+
+  useEffect(() => {
+    if (sessionData?.user?.id) {
+      const interval = setInterval(() => {
+        checkForNewNotifications();
+      }, 60000); // Check every 60 seconds
+
+      // Initial check
+      if (!hasFetchedNotifications.current) {
+        checkForNewNotifications();
+        hasFetchedNotifications.current = true;
+      }
+
+      return () => clearInterval(interval);
+    }
+  }, [sessionData]);
+  const fetchNotifications = async () => {
+    try {
+      // Create a new FormData instance
+      const formData = new FormData();
+      alert(sessionData?.user?.name);
+      formData.append("operation", "fetchNotifications");
+      formData.append(
+        "json",
+        JSON.stringify({ user_id: sessionData?.user?.id || "" })
+      );
+
+      // Make the POST request to the API
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Ensure the content type is set correctly
+          },
+        }
+      );
+
+      // Check if the response is successful
+      if (response.data.success) {
+        setNotifications(response.data.notifications);
+        console.log(response.data.notifications);
+        // Update unread count
+        const unread = response.data.notifications.filter(
+          (notif: Notification) => notif.Status === "Unread"
+        ).length;
+        setUnreadCount(unread);
+      } else {
+        throw new Error(
+          response.data.message || "Failed to fetch notifications."
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const checkForNewNotifications = async () => {
+    try {
+      const formData = new FormData();
+      formData.append(
+        "json",
+        JSON.stringify({ user_id: sessionData?.user?.id || "" })
+      );
+      formData.append("operation", "fetchUnreadCount");
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData
+      );
+
+      const data = response.data;
+      const newUnreadCount = data.unreadCount;
+
+      if (newUnreadCount > unreadCount) {
+        // Display toast notification
+        toast({
+          title: "New Notifications",
+          description: `You have ${newUnreadCount} unread notification(s).`,
+        });
+
+        // Update unread count
+        setUnreadCount(newUnreadCount);
+      } else {
+        setUnreadCount(newUnreadCount);
+      }
+    } catch (error) {
+      console.error("Error checking for new notifications:", error);
+    }
+  };
+
+  const markAsRead = async (notificationId: number) => {
+    try {
+      const formData = new FormData();
+      formData.append(
+        "json",
+        JSON.stringify({
+          user_id: sessionData?.user?.id || "",
+        })
+      );
+      formData.append("operation", "markNotificationAsRead");
+
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData
+      );
+
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.NotificationID === notificationId ? { ...n, Status: "Read" } : n
+        )
+      );
+
+      setUnreadCount((prev) => prev - 1);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50 relative">
       {/* Dynamic Islands Container */}
@@ -154,9 +313,27 @@ export default function AdminLayout({
           })}
         </div>
 
-        {/* Profile Dynamic Island */}
+        {/* Profile and Notifications Dynamic Island */}
+        <div className="bg-white flex flex-col justify-center items-center gap-4 py-3 rounded-2xl shadow-lg">
+          {/* Notifications Icon */}
+          <div className="relative">
+            <Button
+              variant="ghost"
+              className="p-4 rounded-full text-gray-700 hover:bg-gray-200"
+              aria-label="Notifications"
+              onClick={() => setIsNotifModalOpen(true)}
+            >
+              <Bell className="h-8 w-8" />
+              {/* Badge for unread notifications */}
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                  {unreadCount}
+                </span>
+              )}
+            </Button>
+          </div>
 
-        <div className="  bg-opacity-40 backdrop-blur-lg shadow-xl  border-opacity-20">
+          {/* Profile Avatar with Drawer */}
           <Drawer open={isOpen} onOpenChange={setIsOpen}>
             <DrawerTrigger asChild>
               <motion.div
@@ -167,13 +344,13 @@ export default function AdminLayout({
                 <Avatar className="h-16 w-16 ring-4 ring-purple-300 ring-offset-4 ring-offset-pink-100">
                   <AvatarImage
                     src={
-                      session?.user?.image ||
+                      sessionData?.user?.image ||
                       "/placeholder.svg?height=64&width=64"
                     }
                     alt="User Avatar"
                   />
                   <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-xl">
-                    {session?.user?.name?.[0] || "AD"}
+                    {sessionData?.user?.name?.[0] || "AD"}
                   </AvatarFallback>
                 </Avatar>
               </motion.div>
@@ -181,24 +358,23 @@ export default function AdminLayout({
             <DrawerContent className="p-6 max-w-[700px] mx-auto rounded-t-3xl bg-white bg-opacity-90 backdrop-blur-lg">
               <DrawerHeader className="text-center">
                 <DrawerTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
-                  {session?.user?.name || "Alice Doe"}
+                  {sessionData?.user?.name || "Alice Doe"}
                 </DrawerTitle>
                 <DrawerDescription className="text-gray-600 mt-2">
-                  {session?.user?.email || "alice.doe@example.com"}
+                  {sessionData?.user?.email || "alice.doe@example.com"}
+                  {sessionData?.user?.id}
                 </DrawerDescription>
               </DrawerHeader>
               <div className="mt-6 flex flex-col items-center space-y-4">
                 <Avatar className="h-24 w-24 ring-4 ring-purple-300 ring-offset-4 ring-offset-pink-100">
                   <AvatarImage
                     src={
-                      session?.user?.image ||
+                      sessionData?.user?.image ||
                       "/placeholder.svg?height=96&width=96"
                     }
                     alt="User Avatar"
                   />
-                  <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-2xl">
-                    {session?.user?.name?.[0] || "AD"}
-                  </AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-2xl"></AvatarFallback>
                 </Avatar>
                 <div className="flex justify-center space-x-4 mt-6">
                   <Link href="/admin/profile">
@@ -223,6 +399,50 @@ export default function AdminLayout({
           </Drawer>
         </div>
       </div>
+
+      {/* Notifications Modal */}
+      <Dialog open={isNotifModalOpen} onOpenChange={setIsNotifModalOpen}>
+        <DialogContent className="z-50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-7xl max-h-[90%]  h-full bg-white rounded-lg shadow-lg p-6">
+          <p>
+            <DialogTitle>Notifications</DialogTitle>
+            <DrawerClose />
+          </p>
+          <DialogDescription>
+            {notifications.length > 0 ? (
+              <ul className="space-y-4 max-h-96 overflow-y-auto">
+                {notifications.map((notif) => (
+                  <li
+                    key={notif.NotificationID}
+                    className="p-4 border rounded-lg flex justify-between items-center"
+                  >
+                    <div>
+                      <p className="font-semibold">{notif.Message}</p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(notif.DateSent).toLocaleString()}
+                      </p>
+                    </div>
+                    {notif.Status === "Unread" && (
+                      <Button
+                        variant="link"
+                        className="text-blue-500 text-sm"
+                        onClick={() => markAsRead(notif.NotificationID)}
+                      >
+                        Mark as Read
+                      </Button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-center text-gray-600">
+                No notifications available.
+              </p>
+            )}
+          </DialogDescription>
+
+          <Button onClick={() => setIsNotifModalOpen(false)}>Close</Button>
+        </DialogContent>
+      </Dialog>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">

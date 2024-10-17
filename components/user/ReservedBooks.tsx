@@ -28,6 +28,7 @@ interface ReservedBook {
   ISBN: string;
   PublicationDate: string;
   ProviderName: string;
+  ReservationStatus: string;
 }
 
 interface Session {
@@ -209,7 +210,7 @@ export default function ReservedBooks() {
                 </ScrollArea>
               </CardContent>
               <CardFooter>
-                {book.StatusName === "Available" ? (
+                {book.ReservationStatus === "Available" ? (
                   <Button
                     onClick={() => handleBorrow(book.ReservationID)}
                     className="w-full"
@@ -218,7 +219,7 @@ export default function ReservedBooks() {
                   </Button>
                 ) : (
                   <Button disabled className="w-full">
-                    {book.StatusName}
+                    {book.ReservationStatus}
                   </Button>
                 )}
               </CardFooter>

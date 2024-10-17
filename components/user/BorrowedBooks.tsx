@@ -28,6 +28,7 @@ interface BorrowedBook {
   StatusName: string;
   ISBN: string;
   PublicationDate: string;
+  BorrowStatus: string;
   ProviderName: string;
   PenaltyFees: number;
 }
@@ -213,7 +214,7 @@ export default function BorrowedBooks() {
                     )}
                     <div className="flex items-center space-x-2">
                       <span className="text-sm font-semibold">Status:</span>
-                      <p className="text-sm">{book.StatusName}</p>
+                      <p className="text-sm">{book.BorrowStatus}</p>
                     </div>
                     <p className="text-sm">
                       <strong>ISBN:</strong> {book.ISBN}
@@ -228,7 +229,7 @@ export default function BorrowedBooks() {
                 </ScrollArea>
               </CardContent>
               <CardFooter>
-                {book.StatusName === "Borrowed" && !book.ReturnDate ? (
+                {book.BorrowStatus === "Borrowed" && !book.ReturnDate ? (
                   <Button
                     onClick={() => handleReturn(book.BorrowID)}
                     className="w-full"

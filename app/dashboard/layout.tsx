@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Book, Calendar, Bell, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSession, signOut } from "next-auth/react";
-import { Session } from "next-auth";
+import { signOut } from "next-auth/react";
 import {
   Drawer,
   DrawerClose,
@@ -19,12 +18,31 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Session } from "next-auth";
+import axios from "axios";
+
+// Define the type for notifications
+interface Notification {
+  NotificationID: number;
+  Message: string;
+  DateSent: string;
+  Status: "Unread" | "Read";
+}
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: User },
   { href: "/dashboard/borrowed", label: "Borrowed", icon: Book },
   { href: "/dashboard/reservations", label: "Reservations", icon: Calendar },
-  { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
+  { href: "#", label: "Notifications", icon: Bell },
 ];
 
 export default function UserLayout({
@@ -36,17 +54,19 @@ export default function UserLayout({
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
   const [sessionData, setSessionData] = useState<Session>();
-  // const { data: session } = useSession();
+  const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { toast } = useToast();
+  const hasFetchedNotifications = useRef(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const response = await fetch("/api/getSession");
-        if (!response.ok) {
-          throw new Error("Failed to fetch session");
-        }
-        const data = await response.json();
-        setSessionData(data.session); // Set fetched session data
+        const response = await axios.get("/api/getSession");
+        const data = response.data;
+        setSessionData(data.session);
+        // alert(data.session);
       } catch (error) {
         console.error("Error fetching session:", error);
       }
@@ -54,6 +74,7 @@ export default function UserLayout({
 
     fetchSession();
   }, []);
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -61,7 +82,130 @@ export default function UserLayout({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  //? Determine if any icon is hovered/selected
+  // Fetch notifications when the modal opens
+  useEffect(() => {
+    if (isNotifModalOpen && sessionData?.user?.id) {
+      fetchNotifications();
+    }
+  }, [isNotifModalOpen, sessionData]);
+
+  // Periodically check for new unread notifications
+  useEffect(() => {
+    if (sessionData?.user?.id) {
+      const interval = setInterval(() => {
+        checkForNewNotifications();
+      }, 60000); // Check every 60 seconds
+
+      // Initial check
+      if (!hasFetchedNotifications.current) {
+        checkForNewNotifications();
+        hasFetchedNotifications.current = true;
+      }
+
+      return () => clearInterval(interval);
+    }
+  }, [sessionData]);
+
+  const fetchNotifications = async () => {
+    try {
+      // Create a new FormData instance
+      const formData = new FormData();
+
+      // Append the operation and user_id to the form data
+      formData.append("operation", "fetchNotifications");
+      formData.append(
+        "json",
+        JSON.stringify({ user_id: sessionData?.user?.id || "" })
+      );
+
+      // Make the POST request to the API
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Ensure the content type is set correctly
+          },
+        }
+      );
+
+      // Check if the response is successful
+      if (response.data.success) {
+        setNotifications(response.data.notifications);
+        console.log(response.data.notifications);
+        // Update unread count
+        const unread = response.data.notifications.filter(
+          (notif: Notification) => notif.Status === "Unread"
+        ).length;
+        setUnreadCount(unread);
+      } else {
+        throw new Error(
+          response.data.message || "Failed to fetch notifications."
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const checkForNewNotifications = async () => {
+    try {
+      const formData = new FormData();
+      // alert(sessionData?.user?.id);
+      formData.append(
+        "json",
+        JSON.stringify({ user_id: sessionData?.user?.id || "" })
+      );
+      formData.append("operation", "fetchUnreadCount");
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData
+      );
+
+      const data = response.data;
+      const newUnreadCount = data.unreadCount;
+
+      if (newUnreadCount > unreadCount) {
+        // Display toast notification
+        toast({
+          title: "New Notifications",
+          description: `You have ${newUnreadCount} unread notification(s).`,
+        });
+
+        // Update unread count
+        setUnreadCount(newUnreadCount);
+      } else {
+        setUnreadCount(newUnreadCount);
+      }
+    } catch (error) {
+      console.error("Error checking for new notifications:", error);
+    }
+  };
+
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("notification_id", notificationId.toString());
+  //     formData.append("operation", "markNotificationAsRead");
+
+  //     await axios.post(
+  //       `${process.env.NEXT_PUBLIC_API_URL}/notification.php`,
+  //       formData
+  //     );
+
+  //     setNotifications((prev) =>
+  //       prev.map((n) =>
+  //         n.NotificationID === notificationId ? { ...n, Status: "Read" } : n
+  //       )
+  //     );
+
+  //     setUnreadCount((prev) => prev - 1);
+  //   } catch (error) {
+  //     console.error("Error marking notification as read:", error);
+  //   }
+  // };
+
+  // Determine if any icon is hovered/selected
   const isAnyHovered = hoveredIndex !== null;
 
   return (
@@ -124,6 +268,83 @@ export default function UserLayout({
         </DrawerContent>
       </Drawer>
 
+      {/* Notifications Modal */}
+      <Dialog open={isNotifModalOpen} onOpenChange={setIsNotifModalOpen}>
+        <DialogContent className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-7xl max-h-[90%] h-full">
+          <DialogHeader>
+            <DialogTitle>Notifications</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            {notifications.length > 0 ? (
+              <ul className="space-y-4 max-h-96 overflow-y-auto">
+                {notifications.map((notif) => (
+                  <li
+                    key={notif.NotificationID}
+                    className="p-2 border rounded-lg"
+                  >
+                    <p className="font-semibold">{notif.Message}</p>
+                    <p className="text-sm text-gray-500">
+                      {new Date(notif.DateSent).toLocaleString()}
+                    </p>
+                    {notif.Status === "Unread" && (
+                      <Button
+                        variant="link"
+                        className="text-blue-500 text-sm"
+                        onClick={async () => {
+                          try {
+                            const formData = new FormData();
+                            confirm(
+                              `Are you sure you want to mark this as read? ${notif.NotificationID}`
+                            );
+                            formData.append(
+                              "json",
+                              JSON.stringify({
+                                user_id: sessionData?.user?.id || "",
+                              })
+                            );
+                            formData.append(
+                              "operation",
+                              "markNotificationAsRead"
+                            );
+
+                            await axios.post(
+                              `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+                              formData
+                            );
+
+                            setNotifications((prev) =>
+                              prev.map((n) =>
+                                n.NotificationID === notif.NotificationID
+                                  ? { ...n, Status: "Read" }
+                                  : n
+                              )
+                            );
+                            // Update unread count
+                            setUnreadCount((prev) => prev - 1);
+                          } catch (error) {
+                            console.error(
+                              "Error marking notification as read:",
+                              error
+                            );
+                          }
+                        }}
+                      >
+                        Mark as Read
+                      </Button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No notifications available.</p>
+            )}
+          </DialogDescription>
+          <DialogFooter>
+            <Button onClick={() => setIsNotifModalOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Dynamic Island Navbar */}
       <motion.nav
         initial={{ width: "300px", height: "60px" }}
@@ -140,6 +361,14 @@ export default function UserLayout({
         {navItems.map((item, index) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
+
+          const handleClick = (e: React.MouseEvent) => {
+            if (item.label === "Notifications") {
+              e.preventDefault();
+              setIsNotifModalOpen(true);
+              fetchNotifications();
+            }
+          };
 
           return (
             <div
@@ -169,7 +398,11 @@ export default function UserLayout({
                 <motion.div
                   whileHover={{
                     scale: 1.5,
-                    transition: { type: "spring", stiffness: 300, damping: 10 },
+                    transition: {
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 10,
+                    },
                   }}
                   whileTap={{ scale: 0.9 }}
                   animate={
@@ -194,12 +427,19 @@ export default function UserLayout({
                   <Button
                     variant="ghost"
                     className={cn(
-                      "p-2 rounded-full transition-transform transform",
+                      "p-2 rounded-full transition-transform transform relative",
                       isActive ? "bg-muted" : "hover:bg-gray-200"
                     )}
                     aria-label={item.label}
+                    onClick={handleClick}
                   >
                     <Icon className="h-6 w-6" />
+                    {/* Badge for unread notifications */}
+                    {item.label === "Notifications" && unreadCount > 0 && (
+                      <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                        {unreadCount}
+                      </span>
+                    )}
                   </Button>
                 </motion.div>
               </Link>
@@ -209,9 +449,7 @@ export default function UserLayout({
       </motion.nav>
 
       {/* Main Content */}
-      <main className=" flex justify-center items-center pt-28 md:pt-32 max-w-4xl mx-auto">
-        {children}
-      </main>
+      <main className="flex justify-center items-center ">{children}</main>
     </div>
   );
 }

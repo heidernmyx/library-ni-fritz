@@ -124,15 +124,14 @@ export default function BookLibrary() {
 
   const fetchGenres = async () => {
     try {
-      const response = await axios.get(
+      const formData = new FormData();
+      formData.append("operation", "fetchGenres");
+      const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
-        {
-          params: {
-            operation: "fetchGenres",
-          },
-        }
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
-      setGenres(response.data);
+      setGenres(response.data.genres);
     } catch (error) {
       toast({
         title: "Error",
@@ -144,18 +143,28 @@ export default function BookLibrary() {
 
   const fetchBooks = async () => {
     try {
+      setIsLoading(true);
+      const formData = new FormData();
+      formData.append("operation", "fetchBooks");
+      // No additional JSON data is required for fetching books
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
-        { operation: "fetchBooks" },
-        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
-      setBooks(response.data);
+      if (response.data.success) {
+        setBooks(response.data.books);
+      } else {
+        throw new Error(response.data.message || "Failed to fetch books.");
+      }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to fetch books.",
+        description: error.message || "Failed to fetch books.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -34,6 +34,7 @@ interface ReservedBook {
   ReservationDate: string;
   ExpirationDate: string;
   StatusName: string;
+  ReservationStatus: string;
   ISBN: string;
 }
 
@@ -78,22 +79,36 @@ export default function AdminReservedBooks() {
 
     const fetchStatuses = async () => {
       try {
+        // Initialize FormData
         const formData = new FormData();
         formData.append("operation", "fetchStatus");
 
+        // Make a POST request with FormData
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
-          formData
+          `${process.env.NEXT_PUBLIC_API_URL}/books.php`, // Ensure correct endpoint
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
         );
 
-        if (response.status === 200) {
-          setStatuses(response.data);
+        // Debugging: Log the response to verify its structure
+        console.log("Fetch Status Response:", response.data);
+
+        // Check if the request was successful
+        if (response.data.success) {
+          setStatuses(response.data.statuses); // Set the statuses array
         } else {
-          setError("Failed to fetch statuses.");
+          throw new Error(response.data.message || "Failed to fetch statuses.");
         }
-      } catch (err: any) {
-        setError("An error occurred while fetching statuses.");
-        console.error("Failed to fetch reservation statuses:", err);
+      } catch (error: any) {
+        // Debugging: Log the error
+        console.error("Fetch Status Error:", error);
+
+        // Display an error toast with the error message
+        toast({
+          title: "Error",
+          description: error.message || "Failed to fetch statuses.",
+          variant: "destructive",
+        });
       }
     };
 
@@ -211,7 +226,7 @@ export default function AdminReservedBooks() {
                       <TableCell>{book.ReservationDate}</TableCell>
                       <TableCell>{book.ExpirationDate}</TableCell>
                       <TableCell>
-                        <Badge>{book.StatusName}</Badge>
+                        <Badge>{book.ReservationStatus}</Badge>
                       </TableCell>
                       <TableCell>
                         <Select

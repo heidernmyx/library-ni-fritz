@@ -38,6 +38,7 @@ interface BorrowedBook {
   StatusName: string;
   ISBN: string;
   PenaltyFees: number;
+  BorrowStatus: string;
 }
 
 export default function AdminBorrowedBooks() {
@@ -178,7 +179,7 @@ export default function AdminBorrowedBooks() {
                           : "No Due Date"}
                       </TableCell>
                       <TableCell>
-                        <Badge>{book.StatusName}</Badge>
+                        <Badge>{book.BorrowStatus}</Badge>
                       </TableCell>
                       <TableCell>
                         <DueDatePicker
