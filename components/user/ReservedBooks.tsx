@@ -13,13 +13,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, Book, Calendar, User } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
 interface Book {
@@ -67,52 +60,43 @@ export default function ReservedBooks() {
     fetchSession();
   }, []);
 
-  useEffect(() => {
-    const fetchReservedBooks = async () => {
-      if (!sessionData) return; // Wait for sessionData to load
-      try {
-        setLoading(true);
-        const formData = new FormData();
-        formData.append("operation", "fetchReservedBooks");
+  const fetchReservedBooks = async () => {
+    if (!sessionData) return; // Wait for sessionData to load
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("operation", "fetchReservedBooks");
 
-        // Only add user_id if the user is a Registered User
-        if (sessionData.user.usertype === "Registered User") {
-          const _data = { user_id: sessionData.user.id };
-          formData.append("json", JSON.stringify(_data));
-        }
-
-        const response = await axios({
-          url: `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
-          method: "post",
-          data: formData,
-        });
-
-        if (response.data.success) {
-          setReservedBooks(response.data.reserved_books);
-        } else {
-          setError("Failed to fetch reserved books.");
-        }
-      } catch (err: any) {
-        setError(
-          err.response ? err.response.data.message : "An error occurred."
-        );
-      } finally {
-        setLoading(false);
+      // Only add user_id if the user is a Registered User
+      if (sessionData.user.usertype === "Registered User") {
+        const _data = { user_id: sessionData.user.id };
+        formData.append("json", JSON.stringify(_data));
       }
-    };
 
+      const response = await axios({
+        url: `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        method: "post",
+        data: formData,
+      });
+
+      if (response.data.success) {
+        setReservedBooks(response.data.reserved_books);
+      } else {
+        setError("Failed to fetch reserved books.");
+      }
+    } catch (err: any) {
+      setError(err.response ? err.response.data.message : "An error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchReservedBooks();
   }, [sessionData]);
 
-  const handleStatusChange = async (bookId: number, newStatus: string) => {
-    console.log(`Changing status of book ${bookId} to ${newStatus}`);
-    // Implement the actual status change logic here
-  };
-
-  const handleBorrow = async (bookId: number) => {
-    console.log(`Borrowing book ${bookId}`);
-    // alert(sessionData?.user?.id);
-    // alert(`Borrowing book ${bookId}`);
+  const handleBorrow = async (reservationId: number) => {
+    console.log(`Borrowing reservation ${reservationId}`);
     try {
       const formData = new FormData();
       formData.append("operation", "borrowBook");
@@ -120,7 +104,7 @@ export default function ReservedBooks() {
         "json",
         JSON.stringify({
           user_id: sessionData?.user?.id,
-          reservation_id: reservedBooks[0].ReservationID,
+          reservation_id: reservationId,
         })
       );
       const response = await axios({
@@ -130,10 +114,15 @@ export default function ReservedBooks() {
       });
       if (response.data.success) {
         alert("Book borrowed successfully");
+        // Refresh the reserved books list after borrowing
+        fetchReservedBooks();
       } else {
-        alert("Failed to borrow book");
+        alert(`Failed to borrow book: ${response.data.message}`);
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error borrowing book:", error);
+      alert("An error occurred while borrowing the book.");
+    }
   };
 
   if (loading) {
@@ -194,27 +183,7 @@ export default function ReservedBooks() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className="text-sm font-semibold">Status:</span>
-                      {sessionData?.user?.usertype === "Registered User" ? (
-                        <p className="text-sm">{book.StatusName}</p>
-                      ) : (
-                        <Select
-                          onValueChange={(value) =>
-                            handleStatusChange(book.BookID, value)
-                          }
-                          defaultValue={book.StatusName}
-                        >
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Available">Available</SelectItem>
-                            <SelectItem value="Reserved">Reserved</SelectItem>
-                            <SelectItem value="Checked Out">
-                              Checked Out
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
+                      <p className="text-sm">{book.StatusName}</p>
                     </div>
                     <p className="text-sm">
                       <strong>ISBN:</strong> {book.ISBN}
@@ -231,14 +200,14 @@ export default function ReservedBooks() {
               <CardFooter>
                 {book.StatusName === "Available" ? (
                   <Button
-                    onClick={() => handleBorrow(book.BookID)}
+                    onClick={() => handleBorrow(book.ReservationID)}
                     className="w-full"
                   >
                     Borrow
                   </Button>
                 ) : (
                   <Button disabled className="w-full">
-                    Pending
+                    {book.StatusName}
                   </Button>
                 )}
               </CardFooter>

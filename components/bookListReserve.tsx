@@ -1,15 +1,5 @@
 "use client";
-//? this is the code for the user side of the Library Catalog
-//? we'll make some adjustments here na if mag click kas book it will go to a page for the Full Details of that book
-//? then proceed with the reservations
-//TODO: change the logic here. the reserve button will NOTIFY the librarian about this user's reservation
-{
-  /*
-! SOOOOO bali the reserve button will just pass 
-! the session ID and Book Id to the notif of the Librarian
-! and will then use the same IDs to confirm the reservation
-*/
-}
+
 import { useEffect, useState } from "react";
 import {
   AlertDialog,
@@ -37,11 +27,15 @@ type Book = {
 export default function BookListReserve() {
   const [books, setBooks] = useState<Book[]>([]);
   const [session, setSession] = useState<any>(null);
+  const [userReservations, setUserReservations] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchSession = async () => {
       const sessionData = await getSession();
       setSession(sessionData);
+      if (sessionData?.user?.id) {
+        fetchUserReservations(sessionData.user.id);
+      }
     };
     fetchSession();
     fetchBooks();
@@ -59,6 +53,30 @@ export default function BookListReserve() {
       console.error(error);
     }
   };
+  const fetchUserReservations = async (userId: any) => {
+    try {
+      const _data = { user_id: userId };
+      const formData = new FormData();
+      formData.append("operation", "fetchReservedBooks");
+      formData.append("json", JSON.stringify(_data));
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData
+      );
+
+      if (response.data.success) {
+        const reservedBooks = response.data.reserved_books.map(
+          (reservation: any) => reservation.BookID
+        );
+        setUserReservations(reservedBooks);
+      } else {
+        console.error("Failed to fetch reserved books:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching reserved books:", error);
+    }
+  };
 
   const reserveBook = async (userId: any, bookId: any) => {
     try {
@@ -73,10 +91,17 @@ export default function BookListReserve() {
         data: formData,
       });
 
-      // alert(response.data);
-      console.log(response.data);
+      const data = response.data;
+      if (data.success) {
+        alert(data.message || "Book reserved successfully.");
+        // Refetch reservations to update the UI
+        fetchUserReservations(userId);
+      } else {
+        alert(data.message || "Failed to reserve book.");
+      }
     } catch (error) {
       console.log(error);
+      alert("An error occurred while reserving the book.");
     }
   };
 
@@ -142,9 +167,17 @@ export default function BookListReserve() {
                 <Button
                   className="w-full"
                   onClick={() => reserveBook(session?.user?.id, book.BookID)}
-                  disabled={!session?.user?.id || book.AvailableCopies === 0}
+                  disabled={
+                    !session?.user?.id ||
+                    book.AvailableCopies === 0 ||
+                    userReservations.includes(book.BookID)
+                  }
                 >
-                  {book.AvailableCopies === 0 ? "Not Available" : "Reserve"}
+                  {userReservations.includes(book.BookID)
+                    ? "Already Reserved"
+                    : book.AvailableCopies === 0
+                    ? "Not Available"
+                    : "Reserve"}
                 </Button>
               </div>
             </AlertDialogContent>

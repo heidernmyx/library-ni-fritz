@@ -28,6 +28,7 @@ interface BorrowedBook {
   ISBN: string;
   PublicationDate: string;
   ProviderName: string;
+  PenaltyFees: number;
 }
 
 interface Session {
@@ -61,46 +62,41 @@ export default function BorrowedBooks() {
     fetchSession();
   }, []);
 
-  useEffect(() => {
-    const fetchBorrowedBooks = async () => {
-      if (!sessionData) return; // Wait for sessionData to load
-      try {
-        setLoading(true);
-        const formData = new FormData();
-        formData.append("operation", "fetchBorrowedBooks");
+  const fetchBorrowedBooks = async () => {
+    if (!sessionData) return;
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("operation", "fetchBorrowedBooks");
 
-        // Only add user_id if the user is a Registered User
-        if (sessionData.user.usertype === "Registered User") {
-          const _data = { user_id: sessionData.user.id };
-          formData.append("json", JSON.stringify(_data));
-        }
-
-        const response = await axios({
-          url: `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
-          method: "post",
-          data: formData,
-        });
-
-        if (response.data.success) {
-          setBorrowedBooks(response.data.borrowed_books);
-        } else {
-          setError("Failed to fetch borrowed books.");
-        }
-      } catch (err: any) {
-        setError(
-          err.response ? err.response.data.message : "An error occurred."
-        );
-      } finally {
-        setLoading(false);
+      if (sessionData.user.usertype === "Registered User") {
+        const _data = { user_id: sessionData.user.id };
+        formData.append("json", JSON.stringify(_data));
       }
-    };
 
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData
+      );
+
+      if (response.data.success) {
+        setBorrowedBooks(response.data.borrowed_books);
+      } else {
+        setError("Failed to fetch borrowed books.");
+      }
+    } catch (err: any) {
+      setError(err.response ? err.response.data.message : "An error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchBorrowedBooks();
   }, [sessionData]);
 
-  const handleReturn = async (bookId: number) => {
-    console.log(`Returning book ${bookId}`);
-    // Implement the actual return logic here
+  const handleReturn = async (borrowId: number) => {
+    console.log(`Returning borrow record ${borrowId}`);
     try {
       const formData = new FormData();
       formData.append("operation", "returnBook");
@@ -108,23 +104,27 @@ export default function BorrowedBooks() {
         "json",
         JSON.stringify({
           user_id: sessionData?.user?.id,
-          book_id: bookId,
+          borrow_id: borrowId,
         })
       );
-      const response = await axios({
-        url: `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
-        method: "post",
-        data: formData,
-      });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData
+      );
       if (response.data.success) {
-        alert("Book returned successfully");
-        // Refresh the borrowed books list after returning
+        const penaltyFees = response.data.penalty_fees;
+        if (penaltyFees > 0) {
+          alert(`Book returned successfully. Penalty fee: $${penaltyFees}`);
+        } else {
+          alert("Book returned successfully.");
+        }
         fetchBorrowedBooks();
       } else {
-        alert("Failed to return book");
+        alert("Failed to return book: " + response.data.message);
       }
     } catch (error) {
       console.error("Error returning book:", error);
+      alert("An error occurred while returning the book.");
     }
   };
 
@@ -182,6 +182,19 @@ export default function BorrowedBooks() {
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">Due On: {book.DueDate}</span>
                     </div>
+                    {book.ReturnDate && (
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">
+                          Returned On: {book.ReturnDate}
+                        </span>
+                      </div>
+                    )}
+                    {book.PenaltyFees > 0 && (
+                      <p className="text-sm text-red-500">
+                        <strong>Penalty Fees:</strong> ${book.PenaltyFees}
+                      </p>
+                    )}
                     <div className="flex items-center space-x-2">
                       <span className="text-sm font-semibold">Status:</span>
                       <p className="text-sm">{book.StatusName}</p>
@@ -199,12 +212,18 @@ export default function BorrowedBooks() {
                 </ScrollArea>
               </CardContent>
               <CardFooter>
-                <Button
-                  onClick={() => handleReturn(book.BookID)}
-                  className="w-full"
-                >
-                  Return
-                </Button>
+                {book.StatusName === "Borrowed" && !book.ReturnDate ? (
+                  <Button
+                    onClick={() => handleReturn(book.BorrowID)}
+                    className="w-full"
+                  >
+                    Return
+                  </Button>
+                ) : (
+                  <Button disabled className="w-full">
+                    Returned
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           ))}
