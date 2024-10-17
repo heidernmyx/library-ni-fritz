@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, Book, Calendar, User } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface BorrowedBook {
   BorrowID: number;
@@ -44,6 +45,7 @@ export default function BorrowedBooks() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [sessionData, setSessionData] = useState<Session | null>(null);
+  const { toast } = useToast(); // Initialize toast
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -56,6 +58,7 @@ export default function BorrowedBooks() {
         setSessionData(data.session);
       } catch (error) {
         console.error("Error fetching session:", error);
+        setError("Failed to fetch session data.");
       }
     };
 
@@ -96,7 +99,6 @@ export default function BorrowedBooks() {
   }, [sessionData]);
 
   const handleReturn = async (borrowId: number) => {
-    console.log(`Returning borrow record ${borrowId}`);
     try {
       const formData = new FormData();
       formData.append("operation", "returnBook");
@@ -114,17 +116,31 @@ export default function BorrowedBooks() {
       if (response.data.success) {
         const penaltyFees = response.data.penalty_fees;
         if (penaltyFees > 0) {
-          alert(`Book returned successfully. Penalty fee: $${penaltyFees}`);
+          toast({
+            title: "Book Returned",
+            description: `Book returned successfully. Penalty fee: ₱${penaltyFees}`,
+          });
         } else {
-          alert("Book returned successfully.");
+          toast({
+            title: "Book Returned",
+            description: "Book returned successfully.",
+          });
         }
         fetchBorrowedBooks();
       } else {
-        alert("Failed to return book: " + response.data.message);
+        toast({
+          title: "Failed to Return Book",
+          description: response.data.message || "An error occurred.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error returning book:", error);
-      alert("An error occurred while returning the book.");
+      toast({
+        title: "Error",
+        description: "An error occurred while returning the book.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -192,7 +208,7 @@ export default function BorrowedBooks() {
                     )}
                     {book.PenaltyFees > 0 && (
                       <p className="text-sm text-red-500">
-                        <strong>Penalty Fees:</strong> ${book.PenaltyFees}
+                        <strong>Penalty Fees:</strong> ₱{book.PenaltyFees}
                       </p>
                     )}
                     <div className="flex items-center space-x-2">

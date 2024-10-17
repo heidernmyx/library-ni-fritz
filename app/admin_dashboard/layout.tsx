@@ -10,11 +10,11 @@ import {
   BookOpen,
   Users,
   BarChart,
-  Settings,
   Package,
   X,
   Calendar,
   BookCopy,
+  BookCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -48,6 +48,11 @@ const navItems = [
     href: "/admin_dashboard/borrowed",
     label: "Borrowed Books",
     icon: BookCopy,
+  },
+  {
+    href: "/admin_dashboard/returnedBooks",
+    label: "Returned Books",
+    icon: BookCheck,
   },
 ];
 

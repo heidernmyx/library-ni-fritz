@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Book, Calendar, User } from "lucide-react";
+import { AlertCircle, Book } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Table,
@@ -19,6 +19,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ReservedBook {
   ReservationID: number;
@@ -42,6 +47,7 @@ export default function AdminReservedBooks() {
   const [statuses, setStatuses] = useState<ReservationStatus[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast(); // Use the toast hook
 
   // Fetch reserved books and reservation statuses
   useEffect(() => {
@@ -81,7 +87,6 @@ export default function AdminReservedBooks() {
         );
 
         if (response.status === 200) {
-          alert("Statuses fetched successfully");
           setStatuses(response.data);
         } else {
           setError("Failed to fetch statuses.");
@@ -130,21 +135,48 @@ export default function AdminReservedBooks() {
               : book
           )
         );
+
+        // Show a success toast
+        toast({
+          title: "Status Updated",
+          description: "Reservation status has been updated successfully.",
+        });
       } else {
-        setError("Failed to update reservation status.");
+        // Show an error toast
+        toast({
+          title: "Error",
+          description:
+            response.data.message || "Failed to update reservation status.",
+          variant: "destructive",
+        });
       }
     } catch (err: any) {
-      setError(err.response ? err.response.data.message : "An error occurred.");
+      // Show an error toast
+      toast({
+        title: "Error",
+        description: err.response
+          ? err.response.data.message
+          : "An error occurred while updating the status.",
+        variant: "destructive",
+      });
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-[200px]" />
+        <Skeleton className="h-6 w-full" />
+        <Skeleton className="h-6 w-full" />
+        <Skeleton className="h-6 w-full" />
+      </div>
+    );
   }
 
   if (error) {
     return (
       <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
       </Alert>
@@ -153,66 +185,79 @@ export default function AdminReservedBooks() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Reserved Books</h1>
-      {reservedBooks.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>User</TableHead>
-              <TableHead>Reserved Date</TableHead>
-              <TableHead>Expiration Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {reservedBooks.map((book) => (
-              <TableRow key={book.ReservationID}>
-                <TableCell>{book.Title}</TableCell>
-                <TableCell>{book.Name}</TableCell>
-                <TableCell>{book.ReservationDate}</TableCell>
-                <TableCell>{book.ExpirationDate}</TableCell>
-                <TableCell>{book.StatusName}</TableCell>
-                <TableCell>
-                  <Select
-                    onValueChange={(value) =>
-                      handleStatusChange(book.ReservationID, parseInt(value))
-                    }
-                    defaultValue={
-                      statuses
-                        .find((s) => s.StatusName === book.StatusName)
-                        ?.StatusID.toString() || ""
-                    }
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {statuses.map((status) => (
-                        <SelectItem
-                          key={status.StatusID}
-                          value={status.StatusID.toString()}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Reserved Books</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {reservedBooks.length > 0 ? (
+            <ScrollArea>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Reserved Date</TableHead>
+                    <TableHead>Expiration Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {reservedBooks.map((book) => (
+                    <TableRow key={book.ReservationID}>
+                      <TableCell>{book.Title}</TableCell>
+                      <TableCell>{book.Name}</TableCell>
+                      <TableCell>{book.ReservationDate}</TableCell>
+                      <TableCell>{book.ExpirationDate}</TableCell>
+                      <TableCell>
+                        <Badge>{book.StatusName}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          onValueChange={(value) =>
+                            handleStatusChange(
+                              book.ReservationID,
+                              parseInt(value)
+                            )
+                          }
+                          defaultValue={
+                            statuses
+                              .find((s) => s.StatusName === book.StatusName)
+                              ?.StatusID.toString() || ""
+                          }
                         >
-                          {status.StatusName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <Alert>
-          <Book className="h-4 w-4" />
-          <AlertTitle>No Reservations</AlertTitle>
-          <AlertDescription>
-            There are no reserved books at the moment.
-          </AlertDescription>
-        </Alert>
-      )}
+                          <SelectTrigger className="w-[150px]">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {statuses.map((status) => (
+                              <SelectItem
+                                key={status.StatusID}
+                                value={status.StatusID.toString()}
+                              >
+                                {status.StatusName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          ) : (
+            <Alert>
+              <Book className="h-4 w-4" />
+              <AlertTitle>No Reservations</AlertTitle>
+              <AlertDescription>
+                There are no reserved books at the moment.
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

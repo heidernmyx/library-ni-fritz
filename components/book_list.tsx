@@ -1,10 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,13 +13,28 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Card,
   CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
+
 import { useToast } from "@/hooks/use-toast";
 import {
   Book,
@@ -34,12 +46,9 @@ import {
   Bookmark,
   Building,
   Copy,
+  Search,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import bookListReserve from "./bookListReserve";
-import BookListReserve from "./bookListReserve";
-
-type Book = {
+type BookType = {
   BookID: number;
   Title: string;
   AuthorName: string;
@@ -68,7 +77,7 @@ type Genre = {
 };
 
 export default function BookLibrary() {
-  const [books, setBooks] = useState<Book[]>([]);
+  const [books, setBooks] = useState<BookType[]>([]);
   const [bookProviders, setBookProviders] = useState<BookProvider[]>([]);
   const [newBook, setNewBook] = useState({
     title: "",
@@ -80,13 +89,21 @@ export default function BookLibrary() {
     copies: 1,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [selectedBook, setSelectedBook] = useState<BookType | null>(null);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [updateSelectedGenres, setUpdateSelectedGenres] = useState<string[]>(
     []
   );
   const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Fetch functions and useEffect
+  useEffect(() => {
+    fetchGenres();
+    fetchBookProviders();
+    fetchBooks();
+  }, []);
 
   const fetchBookProviders = async () => {
     try {
@@ -107,7 +124,6 @@ export default function BookLibrary() {
 
   const fetchGenres = async () => {
     try {
-      // const formData = new FormData();
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
         {
@@ -116,8 +132,6 @@ export default function BookLibrary() {
           },
         }
       );
-      // { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-
       setGenres(response.data);
     } catch (error) {
       toast({
@@ -145,12 +159,7 @@ export default function BookLibrary() {
     }
   };
 
-  useEffect(() => {
-    fetchGenres();
-    fetchBookProviders();
-    fetchBooks();
-  }, []);
-
+  // Handle adding a book
   const handleAddBook = async () => {
     setIsLoading(true);
     try {
@@ -207,6 +216,7 @@ export default function BookLibrary() {
     }
   };
 
+  // Handle updating a book
   const handleUpdateBook = async () => {
     if (!selectedBook) return;
 
@@ -227,7 +237,6 @@ export default function BookLibrary() {
           copies: selectedBook.TotalCopies,
         }),
       };
-      console.log(payload);
 
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
@@ -261,6 +270,7 @@ export default function BookLibrary() {
     }
   };
 
+  // Genre selection handlers
   const handleGenreSelect = (genre: string) => {
     if (!selectedGenres.includes(genre)) {
       setSelectedGenres([...selectedGenres, genre]);
@@ -281,6 +291,7 @@ export default function BookLibrary() {
     setUpdateSelectedGenres(updateSelectedGenres.filter((g) => g !== genre));
   };
 
+  // Format genres for display
   const formatGenres = (genres: string | string[]): string => {
     if (Array.isArray(genres)) {
       return genres.join(", ");
@@ -290,26 +301,35 @@ export default function BookLibrary() {
     return "";
   };
 
+  // Filtered books based on search term
+  const filteredBooks = books.filter((book) =>
+    book.Title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="flex flex-col flex-1 mx-auto p-4 min-h-screen w-[80vw] max-w-7xl">
-      <div className="flex justify-between">
-        <h1 className="text-4xl font-extrabold mb-8 text-center text-primary">
+    <div className="container mx-auto p-4 min-h-screen">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+        <h1 className="text-4xl font-extrabold text-primary mb-4 md:mb-0">
           Book Library
         </h1>
-        <Input
-          className="w-[17vw] text-lg"
-          placeholder="Search book..."
-          type="text"
-        />
-      </div>
-      <div className="fixed bottom-3 right-8 z-50">
+        <div className="flex items-center space-x-2">
+          <Input
+            className="w-64"
+            placeholder="Search book..."
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <Search className="h-5 w-5 text-muted-foreground" />
+        </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button className="mb-8 bg-primary hover:bg-primary/90 hover:translate-x-[2px] hover:translate-y-[2px] transition-all delay-150 transform hover:scale-110">
-              <PlusCircle className=" h-4 w-4" />
+            <Button variant="default" className="ml-4">
+              <PlusCircle className="mr-2 h-5 w-5" />
+              Add Book
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="bg-background">
+          <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Add New Book</AlertDialogTitle>
               <AlertDialogDescription>
@@ -317,88 +337,69 @@ export default function BookLibrary() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="title" className="text-right">
-                  Title
-                </Label>
+              {/* Form fields for adding new book */}
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="title">Title</Label>
                 <Input
                   id="title"
                   value={newBook.title}
                   onChange={(e) =>
                     setNewBook({ ...newBook, title: e.target.value })
                   }
-                  className="col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="author" className="text-right">
-                  Author
-                </Label>
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="author">Author</Label>
                 <Input
                   id="author"
                   value={newBook.author}
                   onChange={(e) =>
                     setNewBook({ ...newBook, author: e.target.value })
                   }
-                  className="col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="genres" className="text-right">
-                  Genres
-                </Label>
-                <div className="col-span-3">
-                  <select
-                    title="genres"
-                    id="genres"
-                    onChange={(e) => handleGenreSelect(e.target.value)}
-                    className="w-full border rounded-md p-2"
-                  >
-                    <option value="">Select a genre</option>
+              <div className="flex flex-col space-y-2">
+                <Label>Genres</Label>
+                <Select onValueChange={handleGenreSelect} value="">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select genres" />
+                  </SelectTrigger>
+                  <SelectContent>
                     {genres.map((genre) => (
-                      <option key={genre.GenreId} value={genre.GenreName}>
+                      <SelectItem key={genre.GenreId} value={genre.GenreName}>
                         {genre.GenreName}
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {selectedGenres.map((genre) => (
-                      <Badge
-                        key={genre}
-                        variant="secondary"
-                        className="text-sm"
+                  </SelectContent>
+                </Select>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {selectedGenres.map((genre) => (
+                    <Badge key={genre} variant="secondary">
+                      {genre}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ml-1 h-4 w-4 p-0"
+                        onClick={() => handleGenreRemove(genre)}
                       >
-                        {genre}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="ml-1 h-4 w-4 p-0"
-                          onClick={() => handleGenreRemove(genre)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </Badge>
-                    ))}
-                  </div>
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </Badge>
+                  ))}
                 </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="isbn" className="text-right">
-                  ISBN
-                </Label>
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="isbn">ISBN</Label>
                 <Input
                   id="isbn"
                   value={newBook.isbn}
                   onChange={(e) =>
                     setNewBook({ ...newBook, isbn: e.target.value })
                   }
-                  className="col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="publicationDate" className="text-right">
-                  Publication Date
-                </Label>
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="publicationDate">Publication Date</Label>
                 <Input
                   id="publicationDate"
                   type="date"
@@ -406,37 +407,33 @@ export default function BookLibrary() {
                   onChange={(e) =>
                     setNewBook({ ...newBook, publicationDate: e.target.value })
                   }
-                  className="col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="provider" className="text-right">
-                  Book Provider
-                </Label>
-                <select
-                  title="provider"
-                  id="provider"
-                  value={newBook.providerId}
-                  onChange={(e) =>
-                    setNewBook({ ...newBook, providerId: e.target.value })
+              <div className="flex flex-col space-y-2">
+                <Label>Book Provider</Label>
+                <Select
+                  onValueChange={(value) =>
+                    setNewBook({ ...newBook, providerId: value })
                   }
-                  className="col-span-3 border rounded-md p-2"
+                  value={newBook.providerId}
                 >
-                  <option value="">Select a provider</option>
-                  {bookProviders.map((provider) => (
-                    <option
-                      key={provider.ProviderID}
-                      value={provider.ProviderID}
-                    >
-                      {provider.ProviderName}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a provider" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {bookProviders.map((provider) => (
+                      <SelectItem
+                        key={provider.ProviderID}
+                        value={provider.ProviderID.toString()}
+                      >
+                        {provider.ProviderName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="copies" className="text-right">
-                  Copies
-                </Label>
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="copies">Copies</Label>
                 <Input
                   id="copies"
                   type="number"
@@ -445,7 +442,6 @@ export default function BookLibrary() {
                   onChange={(e) =>
                     setNewBook({ ...newBook, copies: parseInt(e.target.value) })
                   }
-                  className="col-span-3"
                 />
               </div>
             </div>
@@ -459,47 +455,54 @@ export default function BookLibrary() {
         </AlertDialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {books.map((book) => (
-          <Card
-            key={book.BookID}
-            className="bg-card text-card-foreground shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
-          >
-            <CardHeader className="bg-primary/10 p-6 py-28">
-              <CardTitle className="text-2xl font-bold text-center line-clamp-2">
-                {book.Title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="flex items-center space-x-2">
-                <User className="h-5 w-5 text-primary" />
-                <span className="font-semibold">{book.AuthorName}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Bookmark className="h-5 w-5 text-primary" />
-                <span>{formatGenres(book.Genres)}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Book className="h-5 w-5 text-primary" />
-                <span>{book.ISBN}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5 text-primary" />
-                <span>{book.PublicationDate}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Building className="h-5 w-5 text-primary" />
-                <span>{book.ProviderName}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Copy className="h-5 w-5 text-primary" />
-                <span>{book.TotalCopies || "N/A"}</span>
-              </div>
-            </CardContent>
-
-            <CardFooter className="bg-muted/50 p-4">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+      {isLoading ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, index) => (
+            <Skeleton key={index} className="h-64 w-full" />
+          ))}
+        </div>
+      ) : (
+        <ScrollArea className="h-[70vh]">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredBooks.map((book) => (
+              <Card
+                key={book.BookID}
+                className="shadow-lg hover:shadow-xl transition-shadow duration-300"
+              >
+                <CardHeader className="bg-primary/10 p-6">
+                  <CardTitle className="text-2xl font-bold line-clamp-2">
+                    {book.Title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <User className="h-5 w-5 text-primary" />
+                      <span className="font-semibold">{book.AuthorName}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Bookmark className="h-5 w-5 text-primary" />
+                      <span>{formatGenres(book.Genres)}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Book className="h-5 w-5 text-primary" />
+                      <span>{book.ISBN}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      <span>{book.PublicationDate}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Building className="h-5 w-5 text-primary" />
+                      <span>{book.ProviderName}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Copy className="h-5 w-5 text-primary" />
+                      <span>{book.TotalCopies || "N/A"} Copies</span>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="p-4">
                   <Button
                     variant="outline"
                     className="w-full"
@@ -514,202 +517,181 @@ export default function BookLibrary() {
                   >
                     <Edit className="mr-2 h-4 w-4" /> Update
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="bg-background">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Update Book</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Update the details of the book below.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="updateTitle" className="text-right">
-                        Title
-                      </Label>
-                      <Input
-                        id="updateTitle"
-                        value={selectedBook?.Title || ""}
-                        onChange={(e) =>
-                          setSelectedBook((prev) =>
-                            prev ? { ...prev, Title: e.target.value } : null
-                          )
-                        }
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="updateAuthor" className="text-right">
-                        Author
-                      </Label>
-                      <Input
-                        id="updateAuthor"
-                        value={selectedBook?.AuthorName || ""}
-                        onChange={(e) =>
-                          setSelectedBook((prev) =>
-                            prev
-                              ? { ...prev, AuthorName: e.target.value }
-                              : null
-                          )
-                        }
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="updateGenres" className="text-right">
-                        Genres
-                      </Label>
-                      <div className="col-span-3">
-                        <select
-                          title="updateGenres"
-                          id="updateGenres"
-                          onChange={(e) =>
-                            handleUpdateGenreSelect(e.target.value)
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
+      )}
+
+      {/* Update Book Dialog */}
+      {selectedBook && (
+        <AlertDialog
+          open={!!selectedBook}
+          onOpenChange={() => setSelectedBook(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Update Book</AlertDialogTitle>
+              <AlertDialogDescription>
+                Update the details of the book below.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="grid gap-4 py-4">
+              {/* Form fields for updating book */}
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="updateTitle">Title</Label>
+                <Input
+                  id="updateTitle"
+                  value={selectedBook?.Title || ""}
+                  onChange={(e) =>
+                    setSelectedBook((prev) =>
+                      prev ? { ...prev, Title: e.target.value } : null
+                    )
+                  }
+                />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="updateAuthor">Author</Label>
+                <Input
+                  id="updateAuthor"
+                  value={selectedBook?.AuthorName || ""}
+                  onChange={(e) =>
+                    setSelectedBook((prev) =>
+                      prev ? { ...prev, AuthorName: e.target.value } : null
+                    )
+                  }
+                />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <Label>Genres</Label>
+                <Select onValueChange={handleUpdateGenreSelect} value="">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select genres" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {genres.map((genre) => (
+                      <SelectItem key={genre.GenreId} value={genre.GenreName}>
+                        {genre.GenreName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {updateSelectedGenres.map((genre) => (
+                    <Badge key={genre} variant="secondary">
+                      {genre}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ml-1 h-4 w-4 p-0"
+                        onClick={() => handleUpdateGenreRemove(genre)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="updateIsbn">ISBN</Label>
+                <Input
+                  id="updateIsbn"
+                  value={selectedBook?.ISBN || ""}
+                  onChange={(e) =>
+                    setSelectedBook((prev) =>
+                      prev ? { ...prev, ISBN: e.target.value } : null
+                    )
+                  }
+                />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="updatePublicationDate">Publication Date</Label>
+                <Input
+                  id="updatePublicationDate"
+                  type="date"
+                  value={selectedBook?.PublicationDate || ""}
+                  onChange={(e) =>
+                    setSelectedBook((prev) =>
+                      prev ? { ...prev, PublicationDate: e.target.value } : null
+                    )
+                  }
+                />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <Label>Book Provider</Label>
+                <Select
+                  onValueChange={(value) => {
+                    const provider = bookProviders.find(
+                      (p) => p.ProviderID.toString() === value
+                    );
+                    setSelectedBook((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            ProviderName: provider?.ProviderName || null,
                           }
-                          className="w-full border rounded-md p-2"
-                        >
-                          <option value="">Select a genre</option>
-                          {genres.map((genre) => (
-                            <option key={genre.GenreId} value={genre.GenreName}>
-                              {genre.GenreName}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {updateSelectedGenres.map((genre) => (
-                            <Badge
-                              key={genre}
-                              variant="secondary"
-                              className="text-sm"
-                            >
-                              {genre}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="ml-1 h-4 w-4 p-0"
-                                onClick={() => handleUpdateGenreRemove(genre)}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="updateIsbn" className="text-right">
-                        ISBN
-                      </Label>
-                      <Input
-                        id="updateIsbn"
-                        value={selectedBook?.ISBN || ""}
-                        onChange={(e) =>
-                          setSelectedBook((prev) =>
-                            prev ? { ...prev, ISBN: e.target.value } : null
-                          )
-                        }
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label
-                        htmlFor="updatePublicationDate"
-                        className="text-right"
+                        : null
+                    );
+                  }}
+                  value={
+                    bookProviders
+                      .find(
+                        (p) => p.ProviderName === selectedBook?.ProviderName
+                      )
+                      ?.ProviderID.toString() || ""
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a provider" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {bookProviders.map((provider) => (
+                      <SelectItem
+                        key={provider.ProviderID}
+                        value={provider.ProviderID.toString()}
                       >
-                        Publication Date
-                      </Label>
-                      <Input
-                        id="updatePublicationDate"
-                        type="date"
-                        value={selectedBook?.PublicationDate || ""}
-                        onChange={(e) =>
-                          setSelectedBook((prev) =>
-                            prev
-                              ? { ...prev, PublicationDate: e.target.value }
-                              : null
-                          )
-                        }
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="updateProvider" className="text-right">
-                        Book Provider
-                      </Label>
-                      <select
-                        title="updateProvider"
-                        id="updateProvider"
-                        value={
-                          bookProviders.find(
-                            (p) => p.ProviderName === selectedBook?.ProviderName
-                          )?.ProviderID || ""
-                        }
-                        onChange={(e) => {
-                          const provider = bookProviders.find(
-                            (p) => p.ProviderID.toString() === e.target.value
-                          );
-                          setSelectedBook((prev) =>
-                            prev
-                              ? {
-                                  ...prev,
-                                  ProviderName: provider?.ProviderName || null,
-                                }
-                              : null
-                          );
-                        }}
-                        className="col-span-3 border rounded-md p-2"
-                      >
-                        <option value="">Select a provider</option>
-                        {bookProviders.map((provider) => (
-                          <option
-                            key={provider.ProviderID}
-                            value={provider.ProviderID}
-                          >
-                            {provider.ProviderName}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="updateCopies" className="text-right">
-                        Copies
-                      </Label>
-                      <Input
-                        id="updateCopies"
-                        type="text"
-                        value={selectedBook ? selectedBook.TotalCopies : 1}
-                        onChange={(e) => {
-                          const copies = parseInt(e.target.value, 10);
-                          setSelectedBook((prev) =>
-                            prev
-                              ? {
-                                  ...prev,
-                                  TotalCopies: isNaN(copies) ? 1 : copies,
-                                }
-                              : null
-                          );
-                        }}
-                        className="col-span-3"
-                      />
-                    </div>
-                  </div>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel onClick={() => setSelectedBook(null)}>
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleUpdateBook}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Updating..." : "Update Book"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+                        {provider.ProviderName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col space-y-2">
+                <Label htmlFor="updateCopies">Copies</Label>
+                <Input
+                  id="updateCopies"
+                  type="number"
+                  min="1"
+                  value={selectedBook?.TotalCopies || 1}
+                  onChange={(e) => {
+                    const copies = parseInt(e.target.value, 10);
+                    setSelectedBook((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            TotalCopies: isNaN(copies) ? 1 : copies,
+                          }
+                        : null
+                    );
+                  }}
+                />
+              </div>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setSelectedBook(null)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleUpdateBook}
+                disabled={isLoading}
+              >
+                {isLoading ? "Updating..." : "Update Book"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 }

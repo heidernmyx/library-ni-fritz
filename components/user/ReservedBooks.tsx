@@ -14,8 +14,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, Book, Calendar, User } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast"; // Import useToast
 
-interface Book {
+interface ReservedBook {
   ReservationID: number;
   BookID: number;
   Title: string;
@@ -38,10 +39,11 @@ interface Session {
 }
 
 export default function ReservedBooks() {
-  const [reservedBooks, setReservedBooks] = useState<Book[]>([]);
+  const [reservedBooks, setReservedBooks] = useState<ReservedBook[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [sessionData, setSessionData] = useState<Session | null>(null);
+  const { toast } = useToast(); // Initialize toast
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -54,6 +56,7 @@ export default function ReservedBooks() {
         setSessionData(data.session);
       } catch (error) {
         console.error("Error fetching session:", error);
+        setError("Failed to fetch session data.");
       }
     };
 
@@ -73,11 +76,10 @@ export default function ReservedBooks() {
         formData.append("json", JSON.stringify(_data));
       }
 
-      const response = await axios({
-        url: `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
-        method: "post",
-        data: formData,
-      });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData
+      );
 
       if (response.data.success) {
         setReservedBooks(response.data.reserved_books);
@@ -96,7 +98,6 @@ export default function ReservedBooks() {
   }, [sessionData]);
 
   const handleBorrow = async (reservationId: number) => {
-    console.log(`Borrowing reservation ${reservationId}`);
     try {
       const formData = new FormData();
       formData.append("operation", "borrowBook");
@@ -107,21 +108,31 @@ export default function ReservedBooks() {
           reservation_id: reservationId,
         })
       );
-      const response = await axios({
-        url: `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
-        method: "post",
-        data: formData,
-      });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData
+      );
       if (response.data.success) {
-        alert("Book borrowed successfully");
+        toast({
+          title: "Book Borrowed",
+          description: "Book borrowed successfully.",
+        });
         // Refresh the reserved books list after borrowing
         fetchReservedBooks();
       } else {
-        alert(`Failed to borrow book: ${response.data.message}`);
+        toast({
+          title: "Failed to Borrow Book",
+          description: response.data.message || "An error occurred.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error borrowing book:", error);
-      alert("An error occurred while borrowing the book.");
+      toast({
+        title: "Error",
+        description: "An error occurred while borrowing the book.",
+        variant: "destructive",
+      });
     }
   };
 
