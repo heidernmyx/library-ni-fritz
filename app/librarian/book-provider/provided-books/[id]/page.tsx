@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
-import { Book, Library, Search } from 'lucide-react'
+import { Book, Library } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -34,12 +34,12 @@ import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
 
 const ProvidedBooksPage = () => {
-
   const { id } = useParams();
   const searchParams = useSearchParams();
   const [selectedBook, setSelectedBook] = React.useState(0);
   const [providerBookList, setProviderBookList] = React.useState<ProviderBookList[]>([]);
-  const [sortOption, setSortOption] = React.useState<string | null>(null); // Add state for sorting
+  const [sortOption, setSortOption] = React.useState<string | null>(null); // State for sorting
+  const [searchTerm, setSearchTerm] = React.useState(""); // State for search
 
   const params = {
     providerName: searchParams.get('name'),
@@ -74,8 +74,12 @@ const ProvidedBooksPage = () => {
     }
   }
 
-  // Apply sorting before rendering
-  const sortedProviderBookList = sortBooks(providerBookList);
+  const filteredAndSortedBooks = sortBooks(
+    providerBookList.filter((book) => 
+      book.Title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      book.AuthorName.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
   return (
     <div className="flex flex-col flex-1 mx-auto p-4 min-h-[90vh] w-[90vw] max-w-7xl pl-[4vw] bg-background rounded-2xl border-black solid">
@@ -99,6 +103,8 @@ const ProvidedBooksPage = () => {
           <Input
             type="search"
             placeholder="Search books..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} // Update search term
             className="w-full"
           />
         </div>
@@ -115,60 +121,64 @@ const ProvidedBooksPage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sortedProviderBookList.map((books: ProviderBookList) => (
-          <Card key={books.BookID}>
-            <CardHeader>
-              <CardTitle>{books.Title}</CardTitle>
-              <CardDescription className='text-base'>{books.AuthorName}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Genre: {Array.isArray(books.Genres) ? books.Genres.map((genre) => (
-                  <Badge variant={'default'} key={genre}>{genre}</Badge>
-                )) : null}
-              </p>
-              <p className="text-sm text-muted-foreground">Publication Date: {books.PublicationDate}</p>
-            </CardContent>
-            <CardFooter>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full" onClick={() => setSelectedBook(books.BookID)}>
-                    <Book className="mr-2 h-4 w-4" /> View Details
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle className='text-4xl'>{books?.Title}</DialogTitle>
-                    <DialogDescription className='text-base'>by {books?.AuthorName}</DialogDescription>
-                  </DialogHeader>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Image
-                        src="/assets/gif/dragon.gif"
-                        alt={books?.Title || "Dragon GIF"}
-                        width={500} 
-                        height={500} 
-                        className="rounded-lg shadow-lg"
-                      />
+        {filteredAndSortedBooks.length > 0 ? (
+          filteredAndSortedBooks.map((books: ProviderBookList) => (
+            <Card key={books.BookID}>
+              <CardHeader>
+                <CardTitle>{books.Title}</CardTitle>
+                <CardDescription className='text-base'>{books.AuthorName}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Genre: {Array.isArray(books.Genres) ? books.Genres.map((genre) => (
+                    <Badge variant={'default'} key={genre}>{genre}</Badge>
+                  )) : null}
+                </p>
+                <p className="text-sm text-muted-foreground">Publication Date: {books.PublicationDate}</p>
+              </CardContent>
+              <CardFooter>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full" onClick={() => setSelectedBook(books.BookID)}>
+                      <Book className="mr-2 h-4 w-4" /> View Details
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                      <DialogTitle className='text-4xl'>{books?.Title}</DialogTitle>
+                      <DialogDescription className='text-base'>by {books?.AuthorName}</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Image
+                          src="/assets/gif/dragon.gif"
+                          alt={books?.Title || "Dragon GIF"}
+                          width={500}
+                          height={500}
+                          className="rounded-lg shadow-lg"
+                        />
+                      </div>
+                      <div className="space-y-4">
+                        <p><strong>ISBN:</strong> {books.ISBN}</p>
+                        <p><strong>Publisher:</strong> {books?.PublisherName}</p>
+                        <p><strong>Publication Date:</strong> {books?.PublicationDate}</p>
+                        <p><strong>Genre:</strong> {Array.isArray(books.Genres) ? books.Genres.map((genre) => (
+                          <Badge variant={'default'} key={genre}>{genre}</Badge>
+                        )) : null}</p>
+                      </div>
                     </div>
-                    <div className="space-y-4">
-                      <p><strong>ISBN:</strong> {books.ISBN}</p>
-                      <p><strong>Publisher:</strong> {books?.PublisherName}</p>
-                      <p><strong>Publication Date:</strong> {books?.PublicationDate}</p>
-                      <p><strong>Genre:</strong> {Array.isArray(books.Genres) ? books.Genres.map((genre) => (
-                        <Badge variant={'default'} key={genre}>{genre}</Badge>
-                      )) : null}</p>
+                    <div className="mt-4">
+                      <h4 className="font-semibold mb-2">Description</h4>
+                      <p>{books?.Description ? books.Description : "No Description"}</p>
                     </div>
-                  </div>
-                  <div className="mt-4">
-                    <h4 className="font-semibold mb-2">Description</h4>
-                    <p>{books?.Description ? books.Description : "Walay Description"}</p>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </CardFooter>
-          </Card>
-        ))}
+                  </DialogContent>
+                </Dialog>
+              </CardFooter>
+            </Card>
+          ))
+        ) : (
+          <p>No books found.</p>
+        )}
       </div>
     </div>
   )

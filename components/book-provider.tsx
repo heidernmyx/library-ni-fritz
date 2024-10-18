@@ -24,6 +24,7 @@ import ManageProviderDialog from '@/components/manage-provider-dialog';
 import ViewProvidedBookDialog from './view-provided-book-dialog';
 import { handleViewDialog } from '@/lib/actions/book-provider'
 import axios from "axios";
+import { Input } from './ui/input';
 
 type SortKey = keyof BookProvider;
 
@@ -73,6 +74,13 @@ export default function BookProvidersList() {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Book Providers List</h2>
+        <div className="flex-1 max-w-sm">
+          <Input
+            type="search"
+            placeholder="Search provider..."
+            className="w-full ml-56 "
+          />
+        </div>
         <Button onClick={() => handleManage()} className="bg-green-600 hover:bg-green-700">
           <PlusCircle className="mr-2 h-4 w-4" /> Add Provider
         </Button>

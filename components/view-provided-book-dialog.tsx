@@ -87,7 +87,7 @@ const ViewProvidedBookDialog = ({isOpen, onClose, provider}: ViewProvidedBookDia
                 Email: <div className='hover:underline'>{ providerData.Email }</div>
               </div>
             </pre>
-          <DialogDescription className='text-base'>These are the list of books provided by { providerData.ProviderName}</DialogDescription>
+          <DialogDescription className='text-base'>These are the list of books provided by { providerData.ProviderName }</DialogDescription>
         </DialogHeader>
         <div className="max-h-[54vh] overflow-y-auto">
           <Table>
