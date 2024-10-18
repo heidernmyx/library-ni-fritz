@@ -122,7 +122,7 @@ export default function BookProvidersList() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => {handleViewDialog(setIsViewDialogOpen), setSelectedProvider(provider)}}>View Provided Books</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {handleViewDialog(setIsViewDialogOpen), setSelectedProvider(provider), console.log(provider)}}>View Provided Books</DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleManage(provider)}>Edit</DropdownMenuItem>
                       <DropdownMenuItem>Archive</DropdownMenuItem>
                     </DropdownMenuContent>

@@ -1,3 +1,4 @@
+import { Genre } from "./genre-types";
 export interface BookProvider {
   ProviderID?: number;
   ContactID: number;
@@ -10,4 +11,16 @@ export interface BookProvider {
   State: string;
   Country: string;
   PostalCode: string;
+}
+
+
+
+export interface ProviderBookList {
+  BookID: number
+  Title: string
+  ISBN: string
+  Genres: string | string[]
+  PublicationDate: string
+  AuthorName: string
+  PublisherName: string
 }
