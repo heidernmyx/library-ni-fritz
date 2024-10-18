@@ -99,7 +99,7 @@ export default function AdminLayout({
         const response = await axios.get("/api/getSession");
         const data = response.data;
         setSessionData(data.session);
-        // alert(data.session);
+        fetchNotifications();
       } catch (error) {
         console.error("Error fetching session:", error);
       }
@@ -109,19 +109,11 @@ export default function AdminLayout({
   }, []);
 
   useEffect(() => {
-    if (sessionData && sessionData.user) {
-      alert(sessionData.user.id);
-    }
-    fetchNotifications();
-  }, []);
-
-  useEffect(() => {
     if (sessionData?.user?.id) {
       const interval = setInterval(() => {
         checkForNewNotifications();
-      }, 60000); // Check every 60 seconds
+      }, 60000);
 
-      // Initial check
       if (!hasFetchedNotifications.current) {
         checkForNewNotifications();
         hasFetchedNotifications.current = true;
@@ -132,31 +124,23 @@ export default function AdminLayout({
   }, [sessionData]);
   const fetchNotifications = async () => {
     try {
-      // Create a new FormData instance
       const formData = new FormData();
-      alert(sessionData?.user?.name);
       formData.append("operation", "fetchNotifications");
-      formData.append(
-        "json",
-        JSON.stringify({ user_id: sessionData?.user?.id || "" })
-      );
+      formData.append("json", JSON.stringify({ user_id: 83 }));
 
-      // Make the POST request to the API
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data", // Ensure the content type is set correctly
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
-      // Check if the response is successful
       if (response.data.success) {
         setNotifications(response.data.notifications);
         console.log(response.data.notifications);
-        // Update unread count
         const unread = response.data.notifications.filter(
           (notif: Notification) => notif.Status === "Unread"
         ).length;
@@ -189,13 +173,11 @@ export default function AdminLayout({
       const newUnreadCount = data.unreadCount;
 
       if (newUnreadCount > unreadCount) {
-        // Display toast notification
         toast({
           title: "New Notifications",
           description: `You have ${newUnreadCount} unread notification(s).`,
         });
 
-        // Update unread count
         setUnreadCount(newUnreadCount);
       } else {
         setUnreadCount(newUnreadCount);
@@ -209,10 +191,7 @@ export default function AdminLayout({
     try {
       const formData = new FormData();
       formData.append(
-        "json",
-        JSON.stringify({
-          user_id: sessionData?.user?.id || "",
-        })
+        "json", JSON.stringify({ notificationId: notificationId })
       );
       formData.append("operation", "markNotificationAsRead");
 

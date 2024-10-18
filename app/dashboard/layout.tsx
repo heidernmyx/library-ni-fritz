@@ -293,15 +293,10 @@ export default function UserLayout({
                         onClick={async () => {
                           try {
                             const formData = new FormData();
-                            confirm(
-                              `Are you sure you want to mark this as read? ${notif.NotificationID}`
-                            );
+                            
                             formData.append(
-                              "json",
-                              JSON.stringify({
-                                user_id: sessionData?.user?.id || "",
-                              })
-                            );
+                    "json", JSON.stringify({ notificationId: notif.NotificationID })
+                               );
                             formData.append(
                               "operation",
                               "markNotificationAsRead"
