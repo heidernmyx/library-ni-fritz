@@ -60,6 +60,7 @@ import { Book, BookFormField, BookProvider } from "@/lib/types/book-types";
 import { Genre } from "@/lib/types/genre-types";
 import BookLibrary from "@/components/book_list";
 import BookListReserve from "@/components/bookListReserve";
+import AdminReservedBooks from "@/components/librarian/reservedBooks";
 const Books = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [newBook, setNewBook] = useState<BookFormField>({
@@ -184,10 +185,10 @@ const Books = () => {
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="reserved">Resereved</TabsTrigger>
-              <TabsTrigger value="draft">Draft</TabsTrigger>
+              {/* <TabsTrigger value="draft">Draft</TabsTrigger>
               <TabsTrigger value="archived" className="hidden sm:flex">
                 Archived
-              </TabsTrigger>
+              </TabsTrigger> */}
             </TabsList>
             <div className="ml-auto flex items-center gap-2">
               <DropdownMenu>
@@ -213,7 +214,7 @@ const Books = () => {
             <BookLibrary />
           </TabsContent>
           <TabsContent value="reserved">
-            <BookListReserve />
+            <AdminReservedBooks />
           </TabsContent>
         </Tabs>
       </main>

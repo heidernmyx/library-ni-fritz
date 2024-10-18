@@ -132,8 +132,8 @@ export default function ReturnedBooks() {
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
+    <div className="space-y-6 w-[90%] mr-8   mx-auto shadow-xl">
+      <Card className="min-h-[90vh]">
         <CardHeader>
           <CardTitle className="text-2xl">
             Returned Books Pending Confirmation

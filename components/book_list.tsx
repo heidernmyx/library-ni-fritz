@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import {
   AlertDialog,
@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,6 +49,7 @@ import {
   Copy,
   Search,
 } from "lucide-react";
+
 type BookType = {
   BookID: number;
   Title: string;
@@ -56,6 +58,7 @@ type BookType = {
   ISBN: string;
   ProviderName: string | null;
   PublicationDate: string;
+  Description: string;
   TotalCopies?: number;
 };
 
@@ -85,6 +88,7 @@ export default function BookLibrary() {
     genres: [] as string[],
     isbn: "",
     publicationDate: "",
+    description: "",
     providerId: "",
     copies: 1,
   });
@@ -95,8 +99,9 @@ export default function BookLibrary() {
   const [updateSelectedGenres, setUpdateSelectedGenres] = useState<string[]>(
     []
   );
-  const { toast } = useToast();
+  const [sortOption, setSortOption] = useState<string | null>(null); // State for sorting
   const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
 
   // Fetch functions and useEffect
   useEffect(() => {
@@ -146,7 +151,6 @@ export default function BookLibrary() {
       setIsLoading(true);
       const formData = new FormData();
       formData.append("operation", "fetchBooks");
-      // No additional JSON data is required for fetching books
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
         formData,
@@ -168,6 +172,40 @@ export default function BookLibrary() {
     }
   };
 
+  // Sort books based on the selected option
+  const sortBooks = (books: BookType[]) => {
+    if (!sortOption) return books;
+
+    const sortedBooks = [...books];
+
+    switch (sortOption) {
+      case "title":
+        return sortedBooks.sort((a, b) => a.Title.localeCompare(b.Title));
+      case "author":
+        return sortedBooks.sort((a, b) => a.AuthorName.localeCompare(b.AuthorName));
+      case "publicationDate":
+        return sortedBooks.sort(
+          (a, b) =>
+            new Date(a.PublicationDate).getTime() -
+            new Date(b.PublicationDate).getTime()
+        );
+      case "copies":
+        return sortedBooks.sort(
+          (a, b) => (b.TotalCopies || 0) - (a.TotalCopies || 0)
+        );
+      default:
+        return books;
+    }
+  };
+
+  // Filtered and sorted books based on search term and sort option
+  const filteredAndSortedBooks = useMemo(() => {
+    const filtered = books.filter((book) =>
+      book.Title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return sortBooks(filtered);
+  }, [books, searchTerm, sortOption]);
+
   // Handle adding a book
   const handleAddBook = async () => {
     setIsLoading(true);
@@ -179,6 +217,7 @@ export default function BookLibrary() {
           author: newBook.author,
           genres: selectedGenres,
           isbn: newBook.isbn,
+          description: newBook.description,
           publication_date: newBook.publicationDate,
           provider_id: newBook.providerId,
           copies: newBook.copies,
@@ -201,6 +240,7 @@ export default function BookLibrary() {
           genres: [],
           isbn: "",
           publicationDate: "",
+          description: "",
           providerId: "",
           copies: 1,
         });
@@ -231,6 +271,10 @@ export default function BookLibrary() {
 
     setIsLoading(true);
     try {
+      const provider = bookProviders.find(
+        (p) => p.ProviderName === selectedBook.ProviderName
+      );
+
       const payload = {
         operation: "updateBook",
         json: JSON.stringify({
@@ -239,10 +283,9 @@ export default function BookLibrary() {
           author: selectedBook.AuthorName,
           genres: updateSelectedGenres,
           isbn: selectedBook.ISBN,
+          description: selectedBook.Description,
           publication_date: selectedBook.PublicationDate,
-          provider_id: bookProviders.find(
-            (p) => p.ProviderName === selectedBook.ProviderName
-          )?.ProviderID,
+          provider_id: provider ? provider.ProviderID : null,
           copies: selectedBook.TotalCopies,
         }),
       };
@@ -310,26 +353,43 @@ export default function BookLibrary() {
     return "";
   };
 
-  // Filtered books based on search term
-  const filteredBooks = books.filter((book) =>
-    book.Title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
-    <div className="container mx-auto p-4 min-h-screen">
+    <div className="flex flex-col bg-white rounded-md mx-auto p-10 max-h-[90vh]">
+      {/* Header with Title, Search, Sort, and Add Book Button */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8">
         <h1 className="text-4xl font-extrabold text-primary mb-4 md:mb-0">
           Book Library
         </h1>
         <div className="flex items-center space-x-2">
-          <Input
+<div>
+        <Search className="h-5 w-5 text-muted-foreground" />
+
+</div>          <Input
             className="w-64"
             placeholder="Search book..."
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Search className="h-5 w-5 text-muted-foreground" />
+          
+            <Select
+            onValueChange={(value) => setSortOption(value)}
+            value={sortOption}
+            className="w-48"
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="title">Title</SelectItem>
+              <SelectItem value="author">Author</SelectItem>
+              <SelectItem value="publicationDate">Publication Date</SelectItem>
+              <SelectItem value="copies">Number of Copies</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center space-x-2">
+        
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -419,6 +479,15 @@ export default function BookLibrary() {
                 />
               </div>
               <div className="flex flex-col space-y-2">
+                <Label>Book Description</Label>
+                <Input
+                  type="text"
+                  value={newBook.description}
+                  onChange={(e) =>
+                    setNewBook({ ...newBook, description: e.target.value })
+                  }/>
+                </div>
+              <div className="flex flex-col space-y-2">
                 <Label>Book Provider</Label>
                 <Select
                   onValueChange={(value) =>
@@ -464,6 +533,7 @@ export default function BookLibrary() {
         </AlertDialog>
       </div>
 
+      {/* Loading State */}
       {isLoading ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, index) => (
@@ -473,7 +543,7 @@ export default function BookLibrary() {
       ) : (
         <ScrollArea className="h-[70vh]">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredBooks.map((book) => (
+            {filteredAndSortedBooks.map((book) => (
               <Card
                 key={book.BookID}
                 className="shadow-lg hover:shadow-xl transition-shadow duration-300"
@@ -495,15 +565,21 @@ export default function BookLibrary() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Book className="h-5 w-5 text-primary" />
+                      <span>{book.Description}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Book className="h-5 w-5 text-primary" />
                       <span>{book.ISBN}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Calendar className="h-5 w-5 text-primary" />
-                      <span>{book.PublicationDate}</span>
+                      <span>
+                        {new Date(book.PublicationDate).toLocaleDateString()}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Building className="h-5 w-5 text-primary" />
-                      <span>{book.ProviderName}</span>
+                      <span>{book.ProviderName || "Unknown"}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Copy className="h-5 w-5 text-primary" />
@@ -520,7 +596,9 @@ export default function BookLibrary() {
                       setUpdateSelectedGenres(
                         Array.isArray(book.Genres)
                           ? book.Genres
-                          : book.Genres.split(", ")
+                          : book.Genres
+                              .split(", ")
+                              .map((g) => g.trim())
                       );
                     }}
                   >
@@ -613,6 +691,19 @@ export default function BookLibrary() {
                     )
                   }
                 />
+              </div>
+              <div className="flex flex-col space-y-2">
+              <Label htmlFor="updateDescription">Description</Label>
+              <Textarea
+              id="updateDescription"
+              // type="text"
+             value={selectedBook?.Description || ""}
+                  onChange={(e) =>
+                    setSelectedBook((prev) =>
+                      prev ? { ...prev, Description: e.target.value } : null
+                    )
+                  }
+              />
               </div>
               <div className="flex flex-col space-y-2">
                 <Label htmlFor="updatePublicationDate">Publication Date</Label>

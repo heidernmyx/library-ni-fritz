@@ -1,13 +1,21 @@
 "use client";
-// TODO: Rename to layout.tsx for librarian
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BookOpen, Users, BarChart, Settings, Calendar, LucideTruck, SchoolIcon, LucideSchool2 } from "lucide-react";
+import {
+  BookOpen,
+  Users,
+  BarChart,
+  Calendar,
+  LucideTruck,
+  LucideSchool2,
+  Bell,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Drawer,
@@ -18,7 +26,26 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { getSession, signOut } from "next-auth/react";
+import axios from "axios";
+import { signOut } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Alert } from "@/components/ui/alert";
+import { AlertDialog } from "@radix-ui/react-alert-dialog";
+
+// Define the type for notifications
+interface Notification {
+  NotificationID: number;
+  Message: string;
+  DateSent: string;
+  Status: "Unread" | "Read";
+}
 
 const navItems = [
   { href: "/librarian/books", label: "Manage Books", icon: BookOpen },
@@ -36,15 +63,144 @@ export default function LibrarianLayout({
 }) {
   const [hoveredNavIndex, setHoveredNavIndex] = useState<number | null>(null);
   const pathname = usePathname();
-
+  const [sessionData, setSessionData] = useState<any>(); // Adjust the type as per your session
+  const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
   const isAnyNavHovered = hoveredNavIndex !== null;
+
+  // Notification States
+  const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const hasFetchedNotifications = useRef(false);
+  const { toast } = useToast();
+
+  // Fetch session data
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const response = await axios.get("/api/getSession");
+        const data = response.data;
+        setSessionData(data.session);
+        fetchNotifications();
+      } catch (error) {
+        console.error("Error fetching session:", error);
+      }
+    };
+
+    fetchSession();
+  }, []);
+
+  // Polling for new notifications every 60 seconds
+  useEffect(() => {
+    if (sessionData?.user?.id) {
+      const interval = setInterval(() => {
+        checkForNewNotifications();
+      }, 60000); // 60 seconds
+
+      if (!hasFetchedNotifications.current) {
+        checkForNewNotifications();
+        hasFetchedNotifications.current = true;
+      }
+
+      return () => clearInterval(interval);
+    }
+  }, [sessionData]);
+
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("operation", "fetchNotifications");
+      formData.append("json", JSON.stringify({ user_id: sessionData?.user?.id || 0 }));
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setNotifications(response.data.notifications);
+        const unread = response.data.notifications.filter(
+          (notif: Notification) => notif.Status === "Unread"
+        ).length;
+        setUnreadCount(unread);
+      } else {
+        throw new Error(response.data.message || "Failed to fetch notifications.");
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  // Check for new notifications
+  const checkForNewNotifications = async () => {
+    try {
+      const formData = new FormData();
+      formData.append(
+        "json",
+        JSON.stringify({ user_id: sessionData?.user?.id || 0 })
+      );
+      formData.append("operation", "fetchUnreadCount");
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData
+      );
+
+      const data = response.data;
+      const newUnreadCount = data.unreadCount;
+
+      if (newUnreadCount > unreadCount) {
+        toast({
+          title: "New Notifications",
+          description: `You have ${newUnreadCount} unread notification(s).`,
+        });
+
+        setUnreadCount(newUnreadCount);
+        fetchNotifications(); // Optionally fetch updated notifications
+      } else {
+        setUnreadCount(newUnreadCount);
+      }
+    } catch (error) {
+      console.error("Error checking for new notifications:", error);
+    }
+  };
+
+  // Mark notification as read
+  const markAsRead = async (notificationId: number) => {
+    try {
+      const formData = new FormData();
+      formData.append("json", JSON.stringify({ notificationId: notificationId }));
+      formData.append("operation", "markNotificationAsRead");
+
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData
+      );
+
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.NotificationID === notificationId ? { ...n, Status: "Read" } : n
+        )
+      );
+
+      setUnreadCount((prev) => prev - 1);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-400 relative">
       {/* Dynamic Islands Container */}
-      <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50 flex flex-col space-y-4">
+      <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-40 flex flex-col space-y-6">
         {/* Navigation Dynamic Island */}
-        <div className="bg-white flex flex-col justify-center items-center gap-4 py-2 rounded-xl shadow-lg">
+        <div className="bg-white flex flex-col justify-center items-center gap-7 py-3 rounded-2xl shadow-lg">
           {navItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -53,15 +209,15 @@ export default function LibrarianLayout({
               <Link key={item.href} href={item.href}>
                 <motion.div
                   whileHover={{
-                    scale: 1.2,
-                    rotate: 8,
+                    scale: 1.3,
+                    rotate: 10,
                     transition: { type: "spring", stiffness: 300, damping: 10 },
                   }}
-                  whileTap={{ scale: 0.9 }}
+                  whileTap={{ scale: 0.95 }}
                   animate={
                     !isAnyNavHovered
                       ? {
-                          scale: [1, 1.03, 1],
+                          scale: [1, 1.05, 1],
                         }
                       : {}
                   }
@@ -82,9 +238,9 @@ export default function LibrarianLayout({
                   <Button
                     variant="ghost"
                     className={cn(
-                      "p-2 rounded-full transition-transform transform relative overflow-hidden",
+                      "p-4 rounded-full transition-transform transform relative overflow-hidden",
                       isActive
-                        ? "bg-blue-500 text-white"
+                        ? "text-white"
                         : "text-gray-700 hover:bg-gray-200"
                     )}
                     aria-label={item.label}
@@ -96,8 +252,9 @@ export default function LibrarianLayout({
                       animate={{ opacity: isActive ? 1 : 0 }}
                       transition={{ duration: 0.3 }}
                     />
-                    <Icon className="h-6 w-6 relative z-10" />
+                    <Icon className="h-8 w-8 relative z-10" />
                   </Button>
+
                   {/* Floating Label */}
                   <AnimatePresence>
                     {hoveredNavIndex === index && (
@@ -117,67 +274,152 @@ export default function LibrarianLayout({
             );
           })}
         </div>
-        {/* Profile Dynamic Island */}
-        <div className="mt-4">
-          <Drawer>
+
+        {/* Profile and Notifications Dynamic Island */}
+        <div className="bg-white flex flex-col justify-center items-center gap-4 py-3 rounded-2xl shadow-lg">
+          {/* Notifications Icon */}
+          <div className="relative">
+            <Button
+              variant="ghost"
+              className="p-4 rounded-full text-gray-700 hover:bg-gray-200"
+              aria-label="Notifications"
+              onClick={() => setIsNotifModalOpen(true)}
+            >
+              <Bell className="h-8 w-8" />
+              {/* Badge for unread notifications */}
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                  {unreadCount}
+                </span>
+              )}
+            </Button>
+          </div>
+
+          {/* Profile Avatar with Drawer */}
+          <Drawer open={isProfileDrawerOpen} onOpenChange={setIsProfileDrawerOpen}>
             <DrawerTrigger asChild>
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex justify-center items-center rounded-full p-2 cursor-pointer relative overflow-hidden"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="cursor-pointer flex justify-center"
               >
-                {/* Animated Background */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-600 rounded-full"
-                  initial={{ opacity: 0, scale: 1 }}
-                  animate={{ opacity: 0.7, scale: 1.2 }}
-                  transition={{
-                    repeat: Infinity,
-                    repeatType: "mirror",
-                    duration: 4,
-                    ease: "easeInOut",
-                  }}
-                />
-                <Avatar className="h-12 w-12 relative z-10">
-                  <AvatarImage src="/avatars/01.png" alt="User Avatar" />
-                  <AvatarFallback className="bg-green-300">JD</AvatarFallback>
+                <Avatar className="h-16 w-16 ring-4 ring-purple-300 ring-offset-4 ring-offset-pink-100">
+                  <AvatarImage
+                    src={
+                      sessionData?.user?.image ||
+                      "/placeholder.svg?height=64&width=64"
+                    }
+                    alt="User Avatar"
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-xl">
+                    {sessionData?.user?.name?.[0] || "LU"}
+                  </AvatarFallback>
                 </Avatar>
               </motion.div>
             </DrawerTrigger>
-            <DrawerContent className="w-full max-w-[400px]">
-              <DrawerHeader>
-                <DrawerTitle>Profile</DrawerTitle>
-                <DrawerClose className="absolute top-4 right-4" />
+            <DrawerContent className="p-6 max-w-[700px] mx-auto rounded-t-3xl bg-white bg-opacity-90 backdrop-blur-lg">
+              <DrawerHeader className="text-center">
+                <DrawerTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+                  {sessionData?.user?.name || "Librarian User"}
+                </DrawerTitle>
+                <DrawerDescription className="text-gray-600 mt-2">
+                  {sessionData?.user?.email || "librarian@example.com"}
+                  {sessionData?.user?.id && ` (ID: ${sessionData.user.id})`}
+                </DrawerDescription>
               </DrawerHeader>
-              <DrawerDescription>
-                {/* Profile Content */}
-                <div className="flex flex-col items-center space-y-6 mt-6">
-                  <Avatar className="h-20 w-20">
-                    <AvatarImage src="/avatars/01.png" alt="User Avatar" />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
-                  <h2 className="text-2xl font-semibold">John Doe</h2>
-                  <p className="text-gray-600">johndoe@example.com</p>
+              <div className="mt-6 flex flex-col items-center space-y-4">
+                <Avatar className="h-24 w-24 ring-4 ring-purple-300 ring-offset-4 ring-offset-pink-100">
+                  <AvatarImage
+                    src={
+                      sessionData?.user?.image ||
+                      "/placeholder.svg?height=96&width=96"
+                    }
+                    alt="User Avatar"
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-2xl">
+                    {sessionData?.user?.name?.[0] || "L"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex justify-center space-x-4 mt-6">
                   <Link href="/librarian/profile">
-                    <Button className="mt-4">View Profile</Button>
+                    <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
+                      View Profile
+                    </Button>
                   </Link>
                   <Button
+                    variant="outline"
+                    className="border-purple-300 text-purple-600 hover:bg-purple-50 transition-all duration-300"
                     onClick={() => signOut()}
-                    variant="destructive"
-                    className="mt-2"
                   >
                     Logout
                   </Button>
                 </div>
-              </DrawerDescription>
+              </div>
+              <DrawerClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </DrawerClose>
             </DrawerContent>
           </Drawer>
         </div>
       </div>
+      
+      {/* Notifications Modal */}
+      <Dialog open={isNotifModalOpen} onOpenChange={setIsNotifModalOpen}>
+        <DialogContent >
+          <div >
+            {/* Modal Header */}
+            <div className="flex justify-between items-center p-6 border-b">
+              <DialogTitle className="text-2xl font-semibold">Notifications</DialogTitle>
+              
+            </div>
+
+            {/* Modal Body */}
+            <DialogDescription className="p-6 space-y-6">
+              {notifications.length > 0 ? (
+                <ul className="space-y-4 overflow-y-auto h-80 pr-2">
+                  {notifications.map((notif) => (
+                    <li
+                      key={notif.NotificationID}
+                      className="flex justify-between items-start p-4 border rounded-lg bg-gray-50 hover:bg-gray-100"
+                    >
+                      <div>
+                        <p className="font-medium text-lg">{notif.Message}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(notif.DateSent).toLocaleString()}
+                        </p>
+                      </div>
+                      {notif.Status === "Unread" && (
+                        <Button
+                          variant="link"
+                          className="text-blue-600 text-sm font-medium hover:underline"
+                          onClick={() => markAsRead(notif.NotificationID)}
+                        >
+                          Mark as Read
+                        </Button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-center text-gray-500 text-lg">
+                  You have no new notifications.
+                </p>
+              )}
+            </DialogDescription>
+
+            {/* Modal Footer */}
+            <div className="flex justify-end p-6 border-t">
+              <Button onClick={() => setIsNotifModalOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col ">
+      <div className="flex-1 flex flex-col">
         <main className="flex-1 p-6 flex flex-col justify-center items-center">
           {children}
         </main>

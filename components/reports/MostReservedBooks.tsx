@@ -61,7 +61,7 @@ export default function MostReservedBooks() {
   }, []);
 
   return (
-    <Card className="w-full  mx-auto">
+    <Card className="w-full  mx-auto shadow-xl">
       <CardHeader>
         <CardTitle>Most Reserved Books</CardTitle>
         <CardDescription>

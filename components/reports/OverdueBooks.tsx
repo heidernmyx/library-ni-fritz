@@ -68,7 +68,7 @@ export default function OverdueBooks() {
   };
 
   return (
-    <Card className="w-full  mx-auto">
+    <Card className="w-full  mx-auto shadow-xl">
       <CardHeader>
         <CardTitle>Overdue Books</CardTitle>
         <CardDescription>

@@ -199,8 +199,8 @@ export default function AdminReservedBooks() {
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
+    <div className="space-y-6 w-[97%] mr-8   mx-auto shadow-xl">
+      <Card className="min-h-[90vh]">
         <CardHeader>
           <CardTitle className="text-2xl">Reserved Books</CardTitle>
         </CardHeader>

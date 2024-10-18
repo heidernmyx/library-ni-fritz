@@ -112,7 +112,7 @@ export default function AdminLayout({
     if (sessionData?.user?.id) {
       const interval = setInterval(() => {
         checkForNewNotifications();
-      }, 60000);
+      }, 60000); // 60 seconds
 
       if (!hasFetchedNotifications.current) {
         checkForNewNotifications();
@@ -122,6 +122,8 @@ export default function AdminLayout({
       return () => clearInterval(interval);
     }
   }, [sessionData]);
+
+  // Fetch notifications
   const fetchNotifications = async () => {
     try {
       const formData = new FormData();
@@ -155,6 +157,7 @@ export default function AdminLayout({
     }
   };
 
+  // Check for new notifications
   const checkForNewNotifications = async () => {
     try {
       const formData = new FormData();
@@ -179,6 +182,7 @@ export default function AdminLayout({
         });
 
         setUnreadCount(newUnreadCount);
+        fetchNotifications(); // Optionally fetch updated notifications
       } else {
         setUnreadCount(newUnreadCount);
       }
@@ -187,11 +191,13 @@ export default function AdminLayout({
     }
   };
 
+  // Mark notification as read
   const markAsRead = async (notificationId: number) => {
     try {
       const formData = new FormData();
       formData.append(
-        "json", JSON.stringify({ notificationId: notificationId })
+        "json",
+        JSON.stringify({ notificationId: notificationId })
       );
       formData.append("operation", "markNotificationAsRead");
 
@@ -213,9 +219,9 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 relative">
+    <div className="flex min-h-screen bg-gray-400 relative">
       {/* Dynamic Islands Container */}
-      <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50 flex flex-col space-y-6">
+      <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-40 flex flex-col space-y-6">
         {/* Navigation Dynamic Island */}
         <div className="bg-white flex flex-col justify-center items-center gap-7 py-3 rounded-2xl shadow-lg">
           {navItems.map((item, index) => {
@@ -291,8 +297,10 @@ export default function AdminLayout({
             );
           })}
         </div>
+      </div>
 
-        {/* Profile and Notifications Dynamic Island */}
+      {/* Profile and Notifications Dynamic Island */}
+      <div className="fixed right-4 top-1/2 transform -translate-y-1/2 z-40 flex flex-col space-y-6">
         <div className="bg-white flex flex-col justify-center items-center gap-4 py-3 rounded-2xl shadow-lg">
           {/* Notifications Icon */}
           <div className="relative">
@@ -341,7 +349,7 @@ export default function AdminLayout({
                 </DrawerTitle>
                 <DrawerDescription className="text-gray-600 mt-2">
                   {sessionData?.user?.email || "alice.doe@example.com"}
-                  {sessionData?.user?.id}
+              
                 </DrawerDescription>
               </DrawerHeader>
               <div className="mt-6 flex flex-col items-center space-y-4">
@@ -353,7 +361,9 @@ export default function AdminLayout({
                     }
                     alt="User Avatar"
                   />
-                  <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-2xl"></AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-2xl">
+                    {sessionData?.user?.name?.[0] || "A"}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex justify-center space-x-4 mt-6">
                   <Link href="/admin/profile">
@@ -381,45 +391,55 @@ export default function AdminLayout({
 
       {/* Notifications Modal */}
       <Dialog open={isNotifModalOpen} onOpenChange={setIsNotifModalOpen}>
-        <DialogContent className="z-50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-7xl max-h-[90%]  h-full bg-white rounded-lg shadow-lg p-6">
-          <p>
-            <DialogTitle>Notifications</DialogTitle>
-            <DrawerClose />
-          </p>
-          <DialogDescription>
-            {notifications.length > 0 ? (
-              <ul className="space-y-4 max-h-96 overflow-y-auto">
-                {notifications.map((notif) => (
-                  <li
-                    key={notif.NotificationID}
-                    className="p-4 border rounded-lg flex justify-between items-center"
-                  >
-                    <div>
-                      <p className="font-semibold">{notif.Message}</p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(notif.DateSent).toLocaleString()}
-                      </p>
-                    </div>
-                    {notif.Status === "Unread" && (
-                      <Button
-                        variant="link"
-                        className="text-blue-500 text-sm"
-                        onClick={() => markAsRead(notif.NotificationID)}
-                      >
-                        Mark as Read
-                      </Button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-center text-gray-600">
-                No notifications available.
-              </p>
-            )}
-          </DialogDescription>
+        <DialogContent className="max-w-[70%]" >
+          
+            {/* Modal Header */}
+            <div className="flex justify-between items-center p-6 border-b">
+              <DialogTitle className="text-3xl font-semibold">Notifications</DialogTitle>
+            
+            </div>
 
-          <Button onClick={() => setIsNotifModalOpen(false)}>Close</Button>
+            {/* Modal Body */}
+            <DialogDescription className="p-6 space-y-6">
+              {notifications.length > 0 ? (
+                <ul className="space-y-4 overflow-y-auto h-96 pr-2">
+                  {notifications.map((notif) => (
+                    <li
+                      key={notif.NotificationID}
+                      className="flex justify-between items-start p-4 border rounded-lg bg-gray-50 hover:bg-gray-100"
+                    >
+                      <div>
+                        <p className="font-medium text-lg">{notif.Message}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(notif.DateSent).toLocaleString()}
+                        </p>
+                      </div>
+                      {notif.Status === "Unread" && (
+                        <Button
+                          variant="link"
+                          className="text-blue-600 text-sm font-medium hover:underline"
+                          onClick={() => markAsRead(notif.NotificationID)}
+                        >
+                          Mark as Read
+                        </Button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-center text-gray-500 text-lg">
+                  You have no new notifications.
+                </p>
+              )}
+            </DialogDescription>
+
+            {/* Modal Footer */}
+            <div className="flex justify-end p-6 border-t">
+              <Button onClick={() => setIsNotifModalOpen(false)}>
+                Close
+              </Button>
+            </div>
+          
         </DialogContent>
       </Dialog>
 

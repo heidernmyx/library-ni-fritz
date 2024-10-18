@@ -68,7 +68,7 @@ export default function PopularBooks() {
   };
 
   return (
-    <Card className="w-full  mx-auto">
+    <Card className="w-full  mx-auto shadow-xl">
       <CardHeader>
         <CardTitle>Popular Books</CardTitle>
         <CardDescription>
