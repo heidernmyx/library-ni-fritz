@@ -130,10 +130,12 @@ const ViewProvidedBookDialog = ({isOpen, onClose, provider}: ViewProvidedBookDia
           <DialogClose asChild>
             <Button className='border-black' variant={'outline'}>Close</Button>
           </DialogClose>
-        <Link href={`/librarian/book-provider/provided-books/${provider?.ProviderID}`} target='_blank'>
-          <Button className='border-black border border-solid rounded-md' variant={"link"}>View in page</Button>
-        </Link>
-          
+          {/* <Link href={`/librarian/book-provider/provided-books/${provider?.ProviderID}`} target='_blank'> */}
+          <Link href={`/librarian/book-provider/provided-books/${provider?.ProviderID}?name=${provider?.ProviderName}&email=${provider?.Email}&contact=${provider?.Phone}`} 
+            target='_blank'
+          >
+            <Button className='border-black border border-solid rounded-md' variant={"link"}>View in page</Button>
+          </Link>
         </DialogFooter>
       </DialogContent>
     </Dialog>

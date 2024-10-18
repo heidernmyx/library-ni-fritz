@@ -22,5 +22,6 @@ export interface ProviderBookList {
   Genres: string | string[]
   PublicationDate: string
   AuthorName: string
+  Description: string
   PublisherName: string
 }
