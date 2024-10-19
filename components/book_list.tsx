@@ -48,6 +48,7 @@ import {
   Building,
   Copy,
   Search,
+  Library
 } from "lucide-react";
 
 type BookType = {
@@ -57,6 +58,7 @@ type BookType = {
   Genres: string | string[];
   ISBN: string;
   ProviderName: string | null;
+  PublisherName: string | null;
   PublicationDate: string;
   Description: string;
   TotalCopies?: number;
@@ -78,10 +80,14 @@ type Genre = {
   GenreId: number;
   GenreName: string;
 };
-
+type PublisherType = {
+  PublisherID: number;
+  PublisherName: string;
+};
 export default function BookLibrary() {
   const [books, setBooks] = useState<BookType[]>([]);
   const [bookProviders, setBookProviders] = useState<BookProvider[]>([]);
+  const [publishers, setPublishers] = useState<PublisherType[]>([]);
   const [newBook, setNewBook] = useState({
     title: "",
     author: "",
@@ -90,6 +96,7 @@ export default function BookLibrary() {
     publicationDate: "",
     description: "",
     providerId: "",
+    publisherId: "",
     copies: 1,
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -99,6 +106,9 @@ export default function BookLibrary() {
   const [updateSelectedGenres, setUpdateSelectedGenres] = useState<string[]>(
     []
   );
+  //  const [selectedPublisher, setSelectedPublisher] = useState<string | null>("");
+  // const [selectedProvider, setSelectedProvider] = useState<string | null>(""); // Add selected provider
+ 
   const [sortOption, setSortOption] = useState<string | null>(null); // State for sorting
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
@@ -108,6 +118,7 @@ export default function BookLibrary() {
     fetchGenres();
     fetchBookProviders();
     fetchBooks();
+    fetchPublishers();
   }, []);
 
   const fetchBookProviders = async () => {
@@ -126,6 +137,22 @@ export default function BookLibrary() {
       });
     }
   };
+const fetchPublishers = async () => {
+  try{
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/bookpublisher.php`,
+      { operation: "fetchPublishers" },
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    )
+    setPublishers(response.data);
+  }catch(error){
+       toast({
+        title: "Error",
+        description: "Failed to fetch book publishers.",
+        variant: "destructive",
+       })
+  }
+}
 
   const fetchGenres = async () => {
     try {
@@ -220,6 +247,7 @@ export default function BookLibrary() {
           description: newBook.description,
           publication_date: newBook.publicationDate,
           provider_id: newBook.providerId,
+          publisher_id: newBook.publisherId,
           copies: newBook.copies,
         }),
       };
@@ -231,7 +259,6 @@ export default function BookLibrary() {
       );
 
       const data = response.data;
-
       if (data.success) {
         fetchBooks();
         setNewBook({
@@ -242,6 +269,7 @@ export default function BookLibrary() {
           publicationDate: "",
           description: "",
           providerId: "",
+          publisherId:"",
           copies: 1,
         });
         setSelectedGenres([]);
@@ -265,62 +293,69 @@ export default function BookLibrary() {
     }
   };
 
-  // Handle updating a book
   const handleUpdateBook = async () => {
-    if (!selectedBook) return;
+  if (!selectedBook) return;
 
-    setIsLoading(true);
-    try {
-      const provider = bookProviders.find(
-        (p) => p.ProviderName === selectedBook.ProviderName
-      );
+  setIsLoading(true);
+  try {
+    const provider = bookProviders.find(
+      (p) => p.ProviderName === selectedBook.ProviderName
+    );
+    const publisher = publishers.find(
+      (pu) => pu.PublisherName === selectedBook.PublisherName
+    );
 
-      const payload = {
-        operation: "updateBook",
-        json: JSON.stringify({
-          book_id: selectedBook.BookID,
-          title: selectedBook.Title,
-          author: selectedBook.AuthorName,
-          genres: updateSelectedGenres,
-          isbn: selectedBook.ISBN,
-          description: selectedBook.Description,
-          publication_date: selectedBook.PublicationDate,
-          provider_id: provider ? provider.ProviderID : null,
-          copies: selectedBook.TotalCopies,
-        }),
-      };
+    const payload = {
+      operation: "updateBook",
+      json: JSON.stringify({
+        book_id: selectedBook.BookID,
+        title: selectedBook.Title,
+        author: selectedBook.AuthorName,
+        genres: updateSelectedGenres,
+        isbn: selectedBook.ISBN,
+        description: selectedBook.Description,
+        publication_date: selectedBook.PublicationDate,
+        provider_id: provider ? provider.ProviderID : null,
+        publisher_id: publisher ? publisher.PublisherID : null,
+        copies: selectedBook.TotalCopies,
+      }),
+    };
 
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
-        payload,
-        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-      );
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+      payload,
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
 
-      const data = response.data;
+    const data = response.data;
+    console.log(data);
+    // Check if data is a valid object
+    if (typeof data === 'object' && data.success === true) {
+    // Handle the success case
+    fetchBooks();
+    setSelectedBook(null);
+    setUpdateSelectedGenres([]);
 
-      if (data.success) {
-        fetchBooks();
-        setSelectedBook(null);
-        setUpdateSelectedGenres([]);
-        toast({
-          title: "Success",
-          description: "Book updated successfully",
-        });
-      } else {
-        throw new Error(data.message || "Failed to update book");
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: axios.isAxiosError(error)
-          ? error.response?.data?.message || error.message
-          : "An error occurred while updating the book",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+    toast({
+      title: "Success",
+      description: data.message || "Book updated successfully",
+    });
+
+    } else {
+      throw new Error(data.message || "Failed to update book");
     }
-  };
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: axios.isAxiosError(error)
+        ? error.response?.data?.message || error.message
+        : "An error occurred while updating the book",
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // Genre selection handlers
   const handleGenreSelect = (genre: string) => {
@@ -357,9 +392,12 @@ export default function BookLibrary() {
     <div className="flex flex-col bg-white rounded-md mx-auto p-10 max-h-[90vh]">
       {/* Header with Title, Search, Sort, and Add Book Button */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+      <header className="flex justify-center items-center">
+      <Library classname="w-10 h-10"/>
         <h1 className="text-4xl font-extrabold text-primary mb-4 md:mb-0">
           Book Library
         </h1>
+      </header>
         <div className="flex items-center space-x-2">
 <div>
         <Search className="h-5 w-5 text-muted-foreground" />
@@ -486,7 +524,30 @@ export default function BookLibrary() {
                   onChange={(e) =>
                     setNewBook({ ...newBook, description: e.target.value })
                   }/>
-                </div>
+              </div>
+              <div className="flex flex-col space-y-2">
+        <Label htmlFor="publisher">Publisher</Label>
+        <Select
+          onValueChange={(value) =>
+            setNewBook({ ...newBook, publisherId: value })
+          }
+          value={newBook.publisherId}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a publisher" />
+          </SelectTrigger>
+          <SelectContent>
+            {publishers.map((publisher) => (
+              <SelectItem
+                key={publisher.PublisherID}
+                value={publisher.PublisherID.toString()}
+              >
+                {publisher.PublisherName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
               <div className="flex flex-col space-y-2">
                 <Label>Book Provider</Label>
                 <Select
@@ -752,6 +813,45 @@ export default function BookLibrary() {
                         value={provider.ProviderID.toString()}
                       >
                         {provider.ProviderName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+                  <div className="flex flex-col space-y-2">
+                <Label>Book Publishers</Label>
+                <Select
+                  onValueChange={(value) => {
+                    const publisher = publishers.find(
+                      (p) => p.PublisherID.toString() === value
+                    );
+                    setSelectedBook((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                             PublisherName: publisher?.PublisherName || null,
+                          }
+                        : null
+                    );
+                  }}
+                  value={
+                    publishers
+                      .find(
+                        (p) => p.PublisherName === selectedBook?.PublisherName
+                      )
+                      ?.PublisherID.toString() || ""
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a Publishers" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {publishers.map((publisher) => (
+                      <SelectItem
+                        key={publisher.PublisherID}
+                        value={publisher.PublisherID.toString()}
+                      >
+                        {publisher.PublisherName}
                       </SelectItem>
                     ))}
                   </SelectContent>

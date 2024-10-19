@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Book, Calendar, Hash, User, Search } from "lucide-react";
+import { Book, Calendar, Hash, User, Search , Bookmark} from "lucide-react";
 import { getSession } from "next-auth/react";
 import Image from "next/image";
 
@@ -212,16 +212,21 @@ export default function BookListReserve() {
   };
 
   return (
-    <div className="flex flex-col justify-center bg-white mt-20 items-center flex-1 mx-auto p-4 max-h-[75vh] w-[90vw] max-w-7xl pl-[4vw] bg-background rounded-2xl border-black solid">
-      <div className="flex justify-between items-center mb-6 w-full">
-        <Input
+    <div className="flex flex-col justify-center bg-white mt-4 items-center flex-1 mx-auto p-4 max-h-[90vh] w-[90vw] max-w-7xl pl-[4vw] bg-background rounded-2xl border-black solid">
+      <h1 className="text-left text-5xl font-extrabold p-4">Libray Ni Fritz</h1>
+      <div className="flex justify-between items-center mb-6 w-full gap-1">
+        <div className="w-full flex items-center justify-center gap-1">
+        <Search/>
+            <Input
           type="search"
           placeholder="Search books..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full max-w-md"
+          className="w-full"
         />
-        <Select onValueChange={(value) => setSortOption(value)} className="ml-4">
+        </div>
+    
+        <Select onValueChange={(value) => setSortOption(value)} >
           <SelectTrigger>
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -233,75 +238,91 @@ export default function BookListReserve() {
         </Select>
       </div>
 
-      <ScrollArea className="h-[75vh] w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+       <ScrollArea className="h-[calc(90vh-150px)] w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredAndSortedBooks.map((book) => (
-            <Card key={book.BookID}>
-              <CardHeader>
-                <CardTitle>{book.Title}</CardTitle>
-                <CardDescription className="text-base">{book.AuthorName}</CardDescription>
+            <Card key={book.BookID} className="flex flex-col justify-between h-full  shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardHeader className="bg-primary/10 ">
+                <CardTitle className="text-lg font-bold line-clamp-2">{book.Title}</CardTitle>
+                <CardDescription className="text-sm font-medium">{book.AuthorName}</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-grow p-4">
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Genre: {renderGenres(book.Genres)}
+                  <div className="flex flex-wrap">{renderGenres(book.Genres)}</div>
+                  <p className="text-sm text-muted-foreground flex items-center">
+                    <Calendar className="mr-2 h-4 w-4" /> {book.PublicationDate}
                   </p>
-                  <p className="text-sm text-muted-foreground">Publication Date: {book.PublicationDate}</p>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="bg-muted/50 p-4">
                 <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full">
-                      <Book className="mr-2 h-4 w-4" /> View Details
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-3xl">
-                    <DialogHeader>
-                      <DialogTitle>{book.Title}</DialogTitle>
-                      <DialogDescription className="text-base">by {book.AuthorName}</DialogDescription>
-                    </DialogHeader>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Image
-                          src="/assets/gif/dragon.gif"
-                          alt={book.Title || "Dragon GIF"}
-                          width={500}
-                          height={500}
-                          className="rounded-lg shadow-lg"
-                        />
-                      </div>
-                      <div className="space-y-4">
-                        <p><strong>ISBN:</strong> {book.ISBN}</p>
-                        <p><strong>Publisher:</strong> {book.ProviderName || "Unknown"}</p>
-                        <p><strong>Publication Date:</strong> {book.PublicationDate}</p>
-                        <p><strong>Genre:</strong> {renderGenres(book.Genres)}</p>
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <h4 className="font-semibold mb-2">Description</h4>
-                      <p>{book.Description ? book.Description : "No Description"}</p>
-                    </div>
-                    <Button
-                      onClick={() => reserveBook(session?.user?.id, book.BookID)}
-                      disabled={
-                        !session?.user?.id ||
-                        book.AvailableCopies === 0 ||
-                        userReservations.includes(book.BookID) ||
-                        loadingReserve
-                      }
-                      className="mt-4"
-                    >
-                      {loadingReserve
-                        ? "Reserving..."
-                        : userReservations.includes(book.BookID)
-                        ? "Already Reserved"
-                        : book.AvailableCopies === 0
-                        ? "Not Available"
-                        : "Reserve"}
-                    </Button>
-                  </DialogContent>
-                </Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="w-full">
+          <Book className="mr-2 h-4 w-4" /> View Details
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh]">
+        <ScrollArea className="max-h-[calc(90vh-2rem)]">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-2xl font-bold">{book.Title}</DialogTitle>
+            <DialogDescription className="text-lg">{book.AuthorName}</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="aspect-[3/4] relative overflow-hidden rounded-lg shadow-lg">
+                <Image
+                  src="/assets/gif/dragon.gif"
+                  alt={book.Title || "Book cover"}
+                  layout="fill"
+                  objectFit="cover"
+                  className="transition-all duration-300 hover:scale-105"
+                />
+              </div>
+              <div className="flex flex-wrap gap-1">
+              Genres:
+                {renderGenres(book.Genres)}
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-[auto,1fr] gap-x-2 gap-y-4 text-sm">
+                <Hash className="text-muted-foreground" />
+                <p><span className="font-semibold">ISBN:</span> {book.ISBN}</p>
+                <User className="text-muted-foreground" />
+                <p><span className="font-semibold">Publisher:</span> {book.ProviderName || "Unknown"}</p>
+                <Calendar className="text-muted-foreground" />
+                <p><span className="font-semibold">Publication Date:</span> {book.PublicationDate}</p>
+                <Bookmark className="text-muted-foreground" />
+                <p><span className="font-semibold">Available Copies:</span> {book.AvailableCopies}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2 text-lg">Description</h4>
+                <p className="text-muted-foreground">{book.Description || "No description available."}</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-6">
+            <Button
+              onClick={() => reserveBook(session?.user?.id, book.BookID)}
+              disabled={
+                !session?.user?.id ||
+                book.AvailableCopies === 0 ||
+                userReservations.includes(book.BookID) ||
+                loadingReserve
+              }
+              className="w-full"
+            >
+              {loadingReserve
+                ? "Reserving..."
+                : userReservations.includes(book.BookID)
+                ? "Already Reserved"
+                : book.AvailableCopies === 0
+                ? "Not Available"
+                : "Reserve"}
+            </Button>
+          </div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
               </CardFooter>
             </Card>
           ))}

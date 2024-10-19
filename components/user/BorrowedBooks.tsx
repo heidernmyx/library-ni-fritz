@@ -169,10 +169,10 @@ export default function BorrowedBooks() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col bg-white rounded-md mx-auto p-10 max-h-[90vh]">
       <h1 className="text-3xl font-bold">Your Borrowed Books</h1>
       {borrowedBooks.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {borrowedBooks.map((book) => (
             <Card key={book.BorrowID}>
               <CardHeader>

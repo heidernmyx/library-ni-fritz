@@ -209,7 +209,7 @@ export default function UserLayout({
   const isAnyHovered = hoveredIndex !== null;
 
   return (
-    <div className="min-h-screen  bg-gray-400 px-4 md:px-0 relative">
+    <div className="flex min-h-screen bg-gray-400 relative">
       {/* Profile Avatar with Drawer */}
       <Drawer>
         <DrawerTrigger asChild>
@@ -443,8 +443,11 @@ export default function UserLayout({
         })}
       </motion.nav>
 
-      {/* Main Content */}
-      <main className="flex justify-center items-center w-full h-full">{children}</main>
+     <div className="flex-1 flex flex-col">
+        <main className="flex-1 p-6 flex flex-col justify-center items-center">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table"
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ArrowUpDown, MoreHorizontal, Library } from 'lucide-react';
+import { PlusCircle, ArrowUpDown, MoreHorizontal, UserCog2Icon } from 'lucide-react';
 
 // import { fetchProviders, addProvider, updateProvider } from '@/lib/actions/book-provider';
 import {
@@ -75,7 +75,7 @@ const AdminSideManageUsers: React.FC<AdminSideManageUsersProps> = ({ sessionData
     <div>
       <header className="mb-8">
         <h1 className="text-3xl font-bold mb-2 flex items-center">
-          <Library className="mr-2" />
+          <UserCog2Icon className="mr-2" />
           User Lists
         </h1>
         <pre className='flex flex-col text-muted-foreground'>

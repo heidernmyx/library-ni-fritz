@@ -240,7 +240,7 @@ export default function ReservedBooks() {
   }
 
   return (
-    <div className="space-y-6 bg-white mx-auto p-4 max-h-[75vh] w-[90vw] max-w-7xl mt-20 rounded-md border border-gray-200">
+     <div className="flex flex-col bg-white rounded-md mx-auto p-10 max-h-[70vh]">
       <h1 className="text-3xl font-bold">Your Reserved Books</h1>
 
       {/* Search and Sort Controls */}
@@ -269,7 +269,7 @@ export default function ReservedBooks() {
       {/* Reserved Books Grid */}
       {filteredAndSortedBooks.length > 0 ? (
         <ScrollArea className="h-[60vh] w-full">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {filteredAndSortedBooks.map((book) => (
               <Card key={book.ReservationID} className="flex flex-col justify-between">
                 <CardHeader>

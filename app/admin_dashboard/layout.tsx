@@ -15,7 +15,8 @@ import {
   Calendar,
   BookCopy,
   BookCheck,
-  Bell, // Bell icon for notifications
+  Bell,
+AlbumIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -30,18 +31,15 @@ import {
 import axios from "axios";
 
 import { signOut } from "next-auth/react";
-import { useToast } from "@/hooks/use-toast"; // Ensure you have this hook
+import { useToast } from "@/hooks/use-toast"; 
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
-// Define the type for notifications
 interface Notification {
   NotificationID: number;
   Message: string;
@@ -73,6 +71,11 @@ const navItems = [
     label: "Returned Books",
     icon: BookCheck,
   },
+  {
+    href: "/admin_dashboard/genre",
+    label: "Genre Management",
+    icon:AlbumIcon,
+  }
 ];
 
 
@@ -119,7 +122,7 @@ export default function AdminLayout({
     if (sessionData?.user?.id) {
       const interval = setInterval(() => {
         checkForNewNotifications();
-      }, 60000); // 60 seconds
+      }, 10000000); 
 
       if (!hasFetchedNotifications.current) {
         checkForNewNotifications();
@@ -130,7 +133,6 @@ export default function AdminLayout({
     }
   }, [sessionData]);
 
-  // Fetch notifications
   const fetchNotifications = async () => {
     try {
       const formData = new FormData();
@@ -164,7 +166,6 @@ export default function AdminLayout({
     }
   };
 
-  // Check for new notifications
   const checkForNewNotifications = async () => {
     try {
       const formData = new FormData();
@@ -198,7 +199,6 @@ export default function AdminLayout({
     }
   };
 
-  // Mark notification as read
   const markAsRead = async (notificationId: number) => {
     try {
       const formData = new FormData();
