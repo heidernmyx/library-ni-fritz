@@ -23,7 +23,6 @@ import { BookProvider } from '@/lib/types/book-provider-types';
 import ManageProviderDialog from '@/components/manage-provider-dialog';
 import ViewProvidedBookDialog from './view-provided-book-dialog';
 import { handleViewDialog } from '@/lib/actions/book-provider'
-import axios from "axios";
 import { Input } from './ui/input';
 
 type SortKey = keyof BookProvider;

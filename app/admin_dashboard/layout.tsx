@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, createContext } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -40,7 +40,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Session } from "next-auth";
-
+import { SessionProvider } from "next-auth/react";
 // Define the type for notifications
 interface Notification {
   NotificationID: number;
@@ -75,6 +75,10 @@ const navItems = [
   },
 ];
 
+
+
+
+
 export default function AdminLayout({
   children,
 }: {
@@ -97,8 +101,10 @@ export default function AdminLayout({
     const fetchSession = async () => {
       try {
         const response = await axios.get("/api/getSession");
-        const data = response.data;
-        setSessionData(data.session);
+        const data: Session = response.data.session;
+        
+        console.log(data.user)
+        setSessionData(data);
         fetchNotifications();
       } catch (error) {
         console.error("Error fetching session:", error);
@@ -107,6 +113,7 @@ export default function AdminLayout({
 
     fetchSession();
   }, []);
+
 
   useEffect(() => {
     if (sessionData?.user?.id) {
@@ -446,7 +453,14 @@ export default function AdminLayout({
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         <main className="flex-1 p-6 flex flex-col justify-center items-center">
-          {children}
+          {/* {React.cloneElement(children as React.ReactElement, { sessionData })} */}
+          {/* <SessionContext.Provider>
+            
+          </SessionContext.Provider> */}
+          <SessionProvider >
+            {children}
+          </SessionProvider>
+
         </main>
       </div>
     </div>

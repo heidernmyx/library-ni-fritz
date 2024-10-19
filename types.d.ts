@@ -9,6 +9,7 @@ declare module "next-auth" {
       id: number; // Ensure this is of the correct type
       name: string;
       usertype: string; // Ensure this is included
+      email: string
     };
   }
 

@@ -1,9 +1,15 @@
+import AdminSideManageUsers from '@/components/admin-side-manage-users'
 import React from 'react'
+import { UserProps } from '@/lib/types/user-types';
 
-const UsersList = () => {
+
+
+const UsersListPage = () => {
+
   return (
-    <div>Manage Users</div>
+    // <AdminSideManageUsers/>
+    <></>
   )
 }
 
-export default UsersList
+export default UsersListPage
