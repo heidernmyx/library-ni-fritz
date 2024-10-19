@@ -194,7 +194,6 @@ export default function BookListReserve() {
 
   // Helper function to render genres with separators
   const renderGenres = (genres: string | string[]) => {
-    // If genres is a string, split it into an array by commas and trim whitespace
     const genresArray = Array.isArray(genres)
       ? genres
       : genres
@@ -212,7 +211,7 @@ export default function BookListReserve() {
   };
 
   return (
-    <div className="flex flex-col justify-center bg-white mt-4 items-center flex-1 mx-auto p-4 max-h-[90vh] w-[90vw] max-w-7xl pl-[4vw] bg-background rounded-2xl border-black solid">
+    <div className="flex flex-col justify-center bg-white mt-4 items-center flex-1 mx-auto p-8 max-h-[83vh] translate-y-[-10%]  w-[90vw] max-w-7xl pl-[4vw] bg-background rounded-2xl border-black solid">
       <h1 className="text-left text-5xl font-extrabold p-4">Libray Ni Fritz</h1>
       <div className="flex justify-between items-center mb-6 w-full gap-1">
         <div className="w-full flex items-center justify-center gap-1">

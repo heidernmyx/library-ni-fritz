@@ -28,11 +28,11 @@ const Dashboard = () => {
   // const userType = sessionData?.user? || session?.user;
 
   return (
-    <React.Fragment>
-      <div className="flex flex-col">
+    
+      <div >
         <BookListReserve />
       </div>
-    </React.Fragment>
+
   );
 };
 

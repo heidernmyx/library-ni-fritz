@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Book, Calendar, Bell, LibraryBigIcon } from "lucide-react"
+import { Book, Calendar, Bell, LibraryBigIcon, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { signOut } from "next-auth/react"
 import {
@@ -178,54 +178,61 @@ export default function UserLayout({
           <motion.div
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="fixed bottom-8 right-4 z-50 cursor-pointer"
+             whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="fixed bottom-8 right-[35%] z-50 cursor-pointer"
           >
-            <Avatar className="h-12 w-12">
+            <Avatar className="h-16 w-16 ring-4 ring-purple-300 ring-offset-4 ring-offset-pink-100">
               <AvatarImage
                 src={sessionData?.user?.image || "/avatars/01.png"}
                 alt="User Avatar"
               />
-              <AvatarFallback className="bg-green-300">
-                {sessionData?.user?.name?.[0] || "JD"}
+              <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-xl">
+                {sessionData?.user?.name?.[0] || "US"}
               </AvatarFallback>
             </Avatar>
           </motion.div>
         </DrawerTrigger>
-        <DrawerContent className="w-full max-w-[600px]">
-          <DrawerHeader>
-            <DrawerTitle>Profile</DrawerTitle>
-            <DrawerClose className="absolute top-4 right-4" />
+        <DrawerContent  className="p-6 max-w-[700px] mx-auto rounded-t-3xl bg-white bg-opacity-90 backdrop-blur-lg">
+          <DrawerHeader className="text-center">
+            <DrawerTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">   {sessionData?.user?.name || "User"}</DrawerTitle>
+            <DrawerDescription className="text-gray-600 mt-2">
+                  {sessionData?.user?.email || "alice.doe@example.com"}
+              
+                </DrawerDescription>
           </DrawerHeader>
-          <DrawerDescription>
-            <div className="flex flex-col items-center space-y-6 mt-6">
-              <Avatar className="h-24 w-24">
-                <AvatarImage
-                  src={sessionData?.user?.image || "/avatars/01.png"}
-                  alt="User Avatar"
-                />
-                <AvatarFallback>
-                  {sessionData?.user?.name?.[0] || "JD"}
-                </AvatarFallback>
-              </Avatar>
-              <h2 className="text-2xl font-semibold">
-                {sessionData?.user?.name || "John Doe"}
-              </h2>
-              <p className="text-gray-600">
-                {sessionData?.user?.email || "johndoe@example.com"}
-              </p>
-              <Link href="/user/profile">
-                <Button className="mt-4">View Profile</Button>
-              </Link>
-              <Button
-                variant="destructive"
-                className="mt-2"
-                onClick={() => signOut()}
-              >
-                Logout
-              </Button>
-            </div>
-          </DrawerDescription>
+          <div className="mt-6 flex flex-col items-center space-y-4">
+                <Avatar className="h-24 w-24 ring-4 ring-purple-300 ring-offset-4 ring-offset-pink-100">
+                  <AvatarImage
+                    src={
+                      sessionData?.user?.image ||
+                      "/placeholder.svg?height=96&width=96"
+                    }
+                    alt="User Avatar"
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-2xl">
+                    {sessionData?.user?.name?.[0] || "A"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex justify-center space-x-4 mt-6">
+                  <Link href="/admin/profile">
+                    <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
+                      View Profile
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    className="border-purple-300 text-purple-600 hover:bg-purple-50 transition-all duration-300"
+                    onClick={() => signOut()}
+                  >
+                    Logout
+                  </Button>
+                </div>
+              </div>
+              <DrawerClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </DrawerClose>
         </DrawerContent>
       </Drawer>
 
