@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/dialog";
 import { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
+
 interface Notification {
   NotificationID: number;
   Message: string;

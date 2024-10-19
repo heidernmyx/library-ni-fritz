@@ -1,39 +1,35 @@
-"use client";
-import BookListReserve from "@/components/bookListReserve";
-import { Session } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
-import React, { useEffect, useState } from "react";
+'use client'
 
-const Dashboard = () => {
-  const [sessionData, setSessionData] = useState<Session>();
-  // const { data: session } = useSession();
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { Book } from "lucide-react"
+
+export default function UserDashboard() {
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const response = await fetch("/api/getSession");
-        if (!response.ok) {
-          throw new Error("Failed to fetch session");
-        }
-        const data = await response.json();
-        setSessionData(data.session); // Set fetched session data
-      } catch (error) {
-        console.error("Error fetching session:", error);
-      }
-    };
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+      router.push("/dashboard/catalog")
+    }, 1500)
 
-    fetchSession();
-  }, []);
-  // Use either the fetched sessionData or the session from useSession
-  // const userType = sessionData?.user? || session?.user;
+    return () => clearTimeout(timer)
+  }, [router])
 
   return (
-    <React.Fragment>
-      <div className="flex flex-col">
-        <BookListReserve />
-      </div>
-    </React.Fragment>
-  );
-};
-
-export default Dashboard;
+    <div className="container mx-auto p-4 min-h-screen flex flex-col items-center justify-center">
+      {isLoading ? (
+        <div className="flex flex-col items-center">
+          {/* <div className="w-64 h-96 bg-gray-100 rounded-lg shadow-md flex items-center justify-center"> */}
+            <Book 
+              className="w-48 h-48 text-primary animate-spin" 
+              style={{ animationDuration: '10s', animationTimingFunction: 'linear' }}
+            />
+          {/* </div> */}
+          <div className="mt-4 text-lg font-semibold text-gray-600">Loading library data <span className="animate-pulse">...</span></div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
