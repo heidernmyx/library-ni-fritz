@@ -393,7 +393,7 @@ const fetchPublishers = async () => {
       {/* Header with Title, Search, Sort, and Add Book Button */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8">
       <header className="flex justify-center items-center">
-      <Library classname="w-10 h-10"/>
+      <Library className="w-10 h-10"/>
         <h1 className="text-4xl font-extrabold text-primary mb-4 md:mb-0">
           Book Library
         </h1>
