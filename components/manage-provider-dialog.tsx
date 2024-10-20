@@ -69,7 +69,6 @@ export default function ManageProviderDialog({ isOpen, onClose, onSave, onUpdate
       onSave(formData);
     }
   };
-  
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

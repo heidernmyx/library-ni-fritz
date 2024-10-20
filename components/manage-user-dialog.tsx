@@ -32,7 +32,7 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
     Lname: '',
     Email: '',
     Phone: '',
-    RoleID: 0,
+    RoleID: session?.user.usertype != "Admin" ? 3 : 0,
     GenderID: 0,
     // RoleName: '',
     // GenderName: ''
@@ -63,7 +63,7 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
         Lname: '',
         Email: '',
         Phone: '',
-        RoleID: 0,
+        RoleID: 3,
         GenderID: 0
       });
     }
@@ -151,7 +151,7 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            {session?.user.usertype === "Admin" && (
+            {session?.user.usertype === "Admin" ? (
               <div className="space-y-1">
                 <Label htmlFor="Role">Role</Label>
                 <Select value={`${formData.RoleID}`} onValueChange={handleRoleChange}>
@@ -165,7 +165,24 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
                   </SelectContent>
                 </Select>
               </div>
-            )}
+            ): <div className="space-y-1">
+                <Label htmlFor="Role">Role</Label>
+                <Select 
+                  name="RoleID"
+                  value={formData.RoleID ? `${formData.RoleID}` : '3'} // Fallback to Registered User if RoleID is not set
+                  disabled={session?.user.usertype !== "Admin"} // Disable for non-admins
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Admin</SelectItem>
+                    <SelectItem value="2">Librarian</SelectItem>
+                    <SelectItem value="3">Registered User</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            }
             <div className="space-y-1">
               <Label htmlFor="Gender">Gender</Label>
               <Select value={`${formData.GenderID}`} onValueChange={handleGenderChange}>

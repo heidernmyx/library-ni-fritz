@@ -64,6 +64,7 @@ export const authOptions: NextAuthOptions = {
           data: formData,
         });
 
+        console.log("RESPONSE: ", response.data);
         const { user_id, name, role, email } = response.data.user;
         const user: User = {
           id: user_id,

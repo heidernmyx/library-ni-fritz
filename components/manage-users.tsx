@@ -38,9 +38,6 @@ interface ManageUsersProps {
   // users?: UserProps[];
 }
 
-// type AdminSideManageUsersProps = {
-  
-// };
 
 const ManageUsers: React.FC<ManageUsersProps> = ({ sessionData }) => {
 
@@ -140,7 +137,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ sessionData }) => {
             {usersList.map((users: UserProps) => (
               <TableRow key={users.UserID}>
                 <TableCell className="font-medium">{users.UserID}</TableCell>
-                <TableCell>{users.Fname}</TableCell>
+                <TableCell>{[users.Fname," ", users.Mname ? String(users.Mname[0]).toLocaleUpperCase() + ". " : '', users.Lname]}</TableCell>
                 <TableCell>{users.Email}</TableCell>
                 <TableCell>
                   {/* {`${provider.Street}, ${provider.City}, ${provider.State} ${provider.PostalCode}, ${provider.Country}`} */}
