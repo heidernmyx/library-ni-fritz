@@ -1,5 +1,4 @@
 export interface UserFormProps {
-  UserID: number
   Fname: string
   Mname: string
   Lname: string

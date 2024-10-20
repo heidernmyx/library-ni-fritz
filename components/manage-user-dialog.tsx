@@ -27,7 +27,6 @@ interface ManageUserDialogProps {
 export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, user, session }: ManageUserDialogProps) {
 
   const [formData, setFormData] = useState<UserFormProps>({
-    UserID: 0,
     Fname: '',
     Mname: '',
     Lname: '',
@@ -48,7 +47,6 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
       
       // Set form data with mapped RoleID and GenderID
       setFormData({
-        UserID: user.UserID,
         Fname: user.Fname,
         Mname: user.Mname || '',
         Lname: user.Lname,
@@ -60,7 +58,6 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
     } else {
       // Reset form for a new user
       setFormData({
-        UserID: 0,
         Fname: '',
         Mname: '',
         Lname: '',
@@ -152,28 +149,6 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
               onChange={handleChange}
               required
             />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <Label htmlFor="Country">Country</Label>
-              <Input
-                id="Country"
-                name="Country"
-                placeholder='Philippines'
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="PostalCode">Postal Code</Label>
-              <Input
-                id="PostalCode"
-                name="PostalCode"
-                placeholder='Eg. 9000'
-                onChange={handleChange}
-                required
-              />
-            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             {session?.user.usertype === "Admin" && (
