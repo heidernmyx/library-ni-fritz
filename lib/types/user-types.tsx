@@ -1,16 +1,27 @@
 export interface UserFormProps {
   UserID: number
-  Name: string
-  username: string
-  password: string
+  Fname: string
+  Mname: string
+  Lname: string
+  Email: string
+  Phone: string
+  RoleID: number
+  // RoleName: string
+  GenderID: number
+  // GenderName: string
 }
 
 export type UserProps = {
   UserID: number
-  Name: string
+  Fname: string
+  Mname: string
+  Lname: string
   Email: string
   Phone: string
   RoleName: string
+  // RoleID: number
+  GenderName: string
+  // GenderID: number
 }
 
 

@@ -109,7 +109,7 @@ export default function BookLibrary() {
   //  const [selectedPublisher, setSelectedPublisher] = useState<string | null>("");
   // const [selectedProvider, setSelectedProvider] = useState<string | null>(""); // Add selected provider
  
-  const [sortOption, setSortOption] = useState<string | null>(null); // State for sorting
+  const [sortOption, setSortOption] = useState<string | undefined>(null); // State for sorting
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 

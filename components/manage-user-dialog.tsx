@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UserProps } from '@/lib/types/user-types'; 
+import { UserFormProps, UserProps } from '@/lib/types/user-types'; 
 import {
   Select,
   SelectContent,
@@ -14,41 +14,64 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Session } from 'next-auth';
-// import { useForm } from 'react-hook-form';
 
 interface ManageUserDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (user: UserProps) => void;
-  onUpdate: (user: UserProps) => void;
+  onSave: (user: UserFormProps) => void;
+  onUpdate: (user: UserFormProps) => void;
   user: UserProps | null;
   session: Session | null
 }
 
 export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, user, session }: ManageUserDialogProps) {
 
-  
-  const [formData, setFormData] = useState<UserProps>({
+  const [formData, setFormData] = useState<UserFormProps>({
     UserID: 0,
-    Name: '',
+    Fname: '',
+    Mname: '',
+    Lname: '',
     Email: '',
     Phone: '',
-    RoleName: ''
+    RoleID: 0,
+    GenderID: 0,
+    // RoleName: '',
+    // GenderName: ''
   });
 
+  // Auto-populate formData with user details if editing
   useEffect(() => {
     if (user) {
-      setFormData(user);
-    } else {  
+      // Map RoleName to RoleID and GenderName to GenderID
+      const roleID = user.RoleName === "Admin" ? 1 : user.RoleName === "Librarian" ? 2 : 3; // Example mapping
+      const genderID = user.GenderName === "Male" ? 1 : user.GenderName === "Female" ? 2 : 3; // Example mapping
+      
+      // Set form data with mapped RoleID and GenderID
+      setFormData({
+        UserID: user.UserID,
+        Fname: user.Fname,
+        Mname: user.Mname || '',
+        Lname: user.Lname,
+        Email: user.Email,
+        Phone: user.Phone,
+        RoleID: roleID,  // Mapped RoleID
+        GenderID: genderID  // Mapped GenderID
+      });
+    } else {
+      // Reset form for a new user
       setFormData({
         UserID: 0,
-        Name: '',
+        Fname: '',
+        Mname: '',
+        Lname: '',
         Email: '',
         Phone: '',
-        RoleName: ''
+        RoleID: 0,
+        GenderID: 0
       });
     }
   }, [user]);
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -57,17 +80,21 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log(formData)
     if (user) {
-      // const result = updateProvider(formData)
-      // alert(provider)  
-      onUpdate(formData)
-    }
-    else {
-      alert(true)
-      onSave(formData);
+      onUpdate(formData); // Update user if editing
+    } else {
+      onSave(formData); // Save new user if adding
     }
   };
   
+  const handleRoleChange = (value: string) => {
+    setFormData({ ...formData, RoleID: parseInt(value, 10) });
+  };
+  
+  const handleGenderChange = (value: string) => {
+    setFormData({ ...formData, GenderID: parseInt(value, 10) });
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -76,17 +103,36 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
           <DialogTitle>{user ? 'Edit User' : 'Add New User'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="ProviderName">User Name</Label>
+          <div className="space-y-1">
+            <Label htmlFor="Fname">First Name</Label>
             <Input
-              id="ProviderName"
-              name="ProviderName"
-              value={formData.Name}
+              id="Fname"
+              name="Fname"
+              value={formData.Fname}
               onChange={handleChange}
               required
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
+            <Label htmlFor="Mname">Middle Name</Label>
+            <Input
+              id="Mname"
+              name="Mname"
+              value={formData.Mname}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="Lname">Last Name</Label>
+            <Input
+              id="Lname"
+              name="Lname"
+              value={formData.Lname}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="space-y-1">
             <Label htmlFor="Phone">Phone</Label>
             <Input
               id="Phone"
@@ -96,7 +142,7 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
               required
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Label htmlFor="Email">Email</Label>
             <Input
               id="Email"
@@ -107,20 +153,59 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
               required
             />
           </div>
-          { <div className="space-y-2">
-            <Label htmlFor="Street">Role</Label>
-            <Select>
-              <SelectTrigger className="w-[100%]">
-                <SelectValue placeholder={`${formData.RoleName}`} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">Admin</SelectItem>
-                <SelectItem value="2">Librarian</SelectItem>
-                <SelectItem value="3">Registered</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="Country">Country</Label>
+              <Input
+                id="Country"
+                name="Country"
+                placeholder='Philippines'
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="PostalCode">Postal Code</Label>
+              <Input
+                id="PostalCode"
+                name="PostalCode"
+                placeholder='Eg. 9000'
+                onChange={handleChange}
+                required
+              />
+            </div>
           </div>
-          }
+          <div className="grid grid-cols-2 gap-4">
+            {session?.user.usertype === "Admin" && (
+              <div className="space-y-1">
+                <Label htmlFor="Role">Role</Label>
+                <Select value={`${formData.RoleID}`} onValueChange={handleRoleChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Admin</SelectItem>
+                    <SelectItem value="2">Librarian</SelectItem>
+                    <SelectItem value="3">Registered User</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="space-y-1">
+              <Label htmlFor="Gender">Gender</Label>
+              <Select value={`${formData.GenderID}`} onValueChange={handleGenderChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Male</SelectItem>
+                  <SelectItem value="2">Female</SelectItem>
+                  <SelectItem value="3">Others</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel

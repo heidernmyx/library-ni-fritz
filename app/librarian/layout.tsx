@@ -27,7 +27,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import axios from "axios";
-import { signOut } from "next-auth/react";
+import { SessionProvider, signOut } from "next-auth/react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -421,7 +421,9 @@ export default function LibrarianLayout({
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         <main className="flex-1 p-6 flex flex-col justify-center items-center">
-          {children}
+          <SessionProvider>
+            {children}
+          </SessionProvider>
         </main>
       </div>
     </div>
