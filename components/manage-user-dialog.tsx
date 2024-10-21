@@ -27,6 +27,7 @@ interface ManageUserDialogProps {
 export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, user, session }: ManageUserDialogProps) {
 
   const [formData, setFormData] = useState<UserFormProps>({
+    UserID: 0,
     Fname: '',
     Mname: '',
     Lname: '',
@@ -47,6 +48,7 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
       
       // Set form data with mapped RoleID and GenderID
       setFormData({
+        UserID: user.UserID,
         Fname: user.Fname,
         Mname: user.Mname || '',
         Lname: user.Lname,
@@ -58,6 +60,7 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
     } else {
       // Reset form for a new user
       setFormData({
+        UserID: 0,
         Fname: '',
         Mname: '',
         Lname: '',

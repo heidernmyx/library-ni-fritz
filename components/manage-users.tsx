@@ -130,6 +130,9 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ sessionData }) => {
               <TableHead className="cursor-pointer" >
                 Role 
               </TableHead>
+              <TableHead className="cursor-pointer" >
+                Gender 
+              </TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -144,10 +147,10 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ sessionData }) => {
                   {users.Phone}
                 </TableCell>
                 <TableCell>
-                  {/* <Button variant="outline" size="sm" >
-                    Manage
-                  </Button> */}
                   {users.RoleName}
+                </TableCell>
+                <TableCell>
+                  {users.GenderName}
                 </TableCell>
                 <TableCell>
                   {/* <Button variant="outline" size="sm" >

@@ -37,7 +37,7 @@ function handlePublicRoutes(
     return NextResponse.redirect(new URL("/admin_dashboard", req.url));
   } else if (token?.usertype === "Librarian") {
     return NextResponse.redirect(new URL("/librarian", req.url));
-  } else if (token?.usertype === "User") {
+  } else if (token?.usertype === "Registered User") {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   } else {
     return NextResponse.next();

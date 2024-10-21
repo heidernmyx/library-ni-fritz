@@ -34,5 +34,14 @@ export const addUser = async (data: any) => {
 }
 
 export const updateUser = async (data: any) => {
+  const formData = new FormData();
+  formData.append("operation", "update_profile")
+  formData.append("json", JSON.stringify(data));
+  const response = await axios({
+    url: `${process.env.NEXT_PUBLIC_API_URL}/users.php`,
+    method: "POST",
+    data: formData
+  })
 
+  return response.data;
 }
