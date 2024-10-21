@@ -21,6 +21,7 @@ export type UserProps = {
   RoleName: string
   // RoleID: number
   GenderName: string
+  Status: number
   // GenderID: number
 }
 

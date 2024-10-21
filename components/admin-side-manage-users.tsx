@@ -130,6 +130,9 @@ const AdminSideManageUsers: React.FC<AdminSideManageUsersProps> = ({ sessionData
               <TableHead className="cursor-pointer" >
                 Role 
               </TableHead>
+              <TableHead className="cursor-pointer" >
+                Gender 
+              </TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -148,6 +151,9 @@ const AdminSideManageUsers: React.FC<AdminSideManageUsersProps> = ({ sessionData
                     Manage
                   </Button> */}
                   {users.RoleName}
+                </TableCell>
+                <TableCell>
+                  {users.GenderName}
                 </TableCell>
                 <TableCell>
                   {/* <Button variant="outline" size="sm" >

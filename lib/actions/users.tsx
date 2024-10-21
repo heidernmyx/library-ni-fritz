@@ -42,6 +42,48 @@ export const updateUser = async (data: any) => {
     method: "POST",
     data: formData
   })
-
   return response.data;
+}
+
+export const archiveUser = async (data: any) => {
+
+  const formData = new FormData();
+  formData.append('operation', 'archive_user');
+  formData.append('json', JSON.stringify({ UserID: data }));
+
+  const result = await axios({
+    url: `${process.env.NEXT_PUBLIC_API_URL}/users.php`,
+    method: 'POST',
+    data: formData
+  })
+  return result.data == 1 ? "User archived successfully." : "Failed to archive user."
+}
+
+
+export const restoreUser = async (data: any) => {
+
+  const formData = new FormData();
+  formData.append('operation', 'restore_user');
+  formData.append('json', JSON.stringify({ UserID: data }));
+
+  const result = await axios({
+    url: `${process.env.NEXT_PUBLIC_API_URL}/users.php`,
+    method: 'POST',
+    data: formData
+  })
+  return result.data == 1 ? "User restored successfully." : "Failed to restore user."
+}
+
+export const deleteUser = async (data: any) => {
+
+  const formData = new FormData();
+  formData.append('operation', 'delete_user');
+  formData.append('json', JSON.stringify({ UserID: data }));
+
+  const result = await axios({
+    url: `${process.env.NEXT_PUBLIC_API_URL}/users.php`,
+    method: "POST",
+    data: formData
+  })
+  alert(result.data == 1 ? "User deleted permanently." : "Failed to delete user.")
 }
