@@ -28,23 +28,25 @@ import { Input } from './ui/input';
 type SortKey = keyof BookProvider;
 
 export default function BookProvidersList() {
-
-  useEffect(() => {
-    fetchProviders().then(setProviders);
-  }, [])
-
   const [providers, setProviders] = useState<BookProvider[]>([]);
+  const [filteredProviders, setFilteredProviders] = useState<BookProvider[]>([]);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<BookProvider | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const handleManage =  async(provider: BookProvider | null = null) => {
+  useEffect(() => {
+    fetchProviders().then((data) => {
+      setProviders(data);
+      setFilteredProviders(data);
+    });
+  }, []);
+
+  const handleManage = (provider: BookProvider | null = null) => {
     setSelectedProvider(provider);
     setIsManageDialogOpen(true);
   };
-  
-
 
   const handleSort = (key: SortKey) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -53,13 +55,13 @@ export default function BookProvidersList() {
     }
     setSortConfig({ key, direction });
 
-    const sortedProviders = [...providers].sort((a, b) => {
+    const sortedProviders = [...filteredProviders].sort((a, b) => {
       if ((a[key] ?? '') < (b[key] ?? '')) return direction === 'asc' ? -1 : 1;
       if ((a[key] ?? '') > (b[key] ?? '')) return direction === 'asc' ? 1 : -1;
       return 0;
     });
 
-    setProviders(sortedProviders);
+    setFilteredProviders(sortedProviders);
   };
 
   const getSortIcon = (key: SortKey) => {
@@ -69,15 +71,29 @@ export default function BookProvidersList() {
     return sortConfig.direction === 'asc' ? '↑' : '↓';
   };
 
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLowerCase();
+    setSearchTerm(value);
+    const filtered = providers.filter(
+      (provider) =>
+        provider.ProviderName.toLowerCase().includes(value) ||
+        provider.Phone.toLowerCase().includes(value) ||
+        provider.Email.toLowerCase().includes(value)
+    );
+    setFilteredProviders(filtered);
+  };
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap justify-between items-center mb-4 space-y-2 md:space-y-0">
         <h2 className="text-xl font-semibold">Book Providers List</h2>
-        <div className="flex-1 max-w-sm">
+        <div className="w-full md:w-auto md:flex-1 max-w-sm">
           <Input
             type="search"
             placeholder="Search provider..."
-            className="w-full ml-56 "
+            value={searchTerm}
+            onChange={handleSearch}
+            className="w-full"
           />
         </div>
         <Button onClick={() => handleManage()} className="bg-green-600 hover:bg-green-700">
@@ -104,39 +120,42 @@ export default function BookProvidersList() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {providers.map((provider) => (
-              <TableRow key={provider.ProviderID}>
-                <TableCell className="font-medium">{provider.ProviderName}</TableCell>
-                <TableCell>{provider.Phone}</TableCell>
-                <TableCell>{provider.Email}</TableCell>
-                <TableCell>
-                  {`${provider.Street}, ${provider.City}, ${provider.State} ${provider.PostalCode}, ${provider.Country}`}
-                </TableCell>
-                <TableCell>
-                  {/* <Button variant="outline" size="sm" >
-                    Manage
-                  </Button> */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        aria-haspopup="true"
-                        size="icon"
-                        variant="ghost"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => {handleViewDialog(setIsViewDialogOpen), setSelectedProvider(provider), console.log(provider)}}>View Provided Books</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleManage(provider)}>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Archive</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+            {filteredProviders.length > 0 ? (
+              filteredProviders.map((provider) => (
+                <TableRow key={provider.ProviderID}>
+                  <TableCell className="font-medium">{provider.ProviderName}</TableCell>
+                  <TableCell>{provider.Phone}</TableCell>
+                  <TableCell>{provider.Email}</TableCell>
+                  <TableCell>
+                    {`${provider.Street}, ${provider.City}, ${provider.State} ${provider.PostalCode}, ${provider.Country}`}
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          aria-haspopup="true"
+                          size="icon"
+                          variant="ghost"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Toggle menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => {handleViewDialog(setIsViewDialogOpen), setSelectedProvider(provider)}}>View Provided Books</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleManage(provider)}>Edit</DropdownMenuItem>
+                        <DropdownMenuItem>Archive</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center">No providers found</TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </div>
@@ -144,7 +163,7 @@ export default function BookProvidersList() {
         isOpen={isManageDialogOpen}
         onClose={() => setIsManageDialogOpen(false)}
         onSave={addProvider}
-        onUpdate = {updateProvider}
+        onUpdate={updateProvider}
         provider={selectedProvider}
       />
       <ViewProvidedBookDialog 

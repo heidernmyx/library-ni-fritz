@@ -429,108 +429,97 @@ const fetchPublishers = async () => {
         <div className="flex items-center space-x-2">
         
         </div>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="default" className="ml-4">
-              <PlusCircle className="mr-2 h-5 w-5" />
-              Add Book
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Add New Book</AlertDialogTitle>
-              <AlertDialogDescription>
-                Enter the details of the new book below.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="grid gap-4 py-4">
-              {/* Form fields for adding new book */}
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  value={newBook.title}
-                  onChange={(e) =>
-                    setNewBook({ ...newBook, title: e.target.value })
-                  }
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="author">Author</Label>
-                <Input
-                  id="author"
-                  value={newBook.author}
-                  onChange={(e) =>
-                    setNewBook({ ...newBook, author: e.target.value })
-                  }
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Label>Genres</Label>
-                <Select onValueChange={handleGenreSelect} value="">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select genres" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {genres.map((genre) => (
-                      <SelectItem key={genre.GenreId} value={genre.GenreName}>
-                        {genre.GenreName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {selectedGenres.map((genre) => (
-                    <Badge key={genre} variant="secondary">
-                      {genre}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="ml-1 h-4 w-4 p-0"
-                        onClick={() => handleGenreRemove(genre)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="isbn">ISBN</Label>
-                <Input
-                  id="isbn"
-                  value={newBook.isbn}
-                  onChange={(e) =>
-                    setNewBook({ ...newBook, isbn: e.target.value })
-                  }
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="publicationDate">Publication Date</Label>
-                <Input
-                  id="publicationDate"
-                  type="date"
-                  value={newBook.publicationDate}
-                  onChange={(e) =>
-                    setNewBook({ ...newBook, publicationDate: e.target.value })
-                  }
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Label>Book Description</Label>
-                <Input
-                  type="text"
-                  value={newBook.description}
-                  onChange={(e) =>
-                    setNewBook({ ...newBook, description: e.target.value })
-                  }/>
-              </div>
-              <div className="flex flex-col space-y-2">
+       <AlertDialog>
+  <AlertDialogTrigger asChild>
+    <Button variant="default" className="ml-4">
+      <PlusCircle className="mr-2 h-5 w-5" />
+      Add Book
+    </Button>
+  </AlertDialogTrigger>
+  <AlertDialogContent className="max-w-[70%] w-full max-h-[90vh] h-auto p-0 overflow-y-auto">
+    <AlertDialogHeader className="p-6 pb-0">
+      <AlertDialogTitle>Add New Book</AlertDialogTitle>
+      <AlertDialogDescription>
+        Enter the details of the new book below.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <div className="grid gap-4 py-4 px-6">
+      {/* Form fields for adding new book */}
+      <div className="flex flex-col space-y-2">
+        <Label htmlFor="title">Title</Label>
+        <Input
+          id="title"
+          value={newBook.title}
+          onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
+        />
+      </div>
+      <div className="flex flex-col space-y-2">
+        <Label htmlFor="author">Author</Label>
+        <Input
+          id="author"
+          value={newBook.author}
+          onChange={(e) => setNewBook({ ...newBook, author: e.target.value })}
+        />
+      </div>
+      <div className="flex flex-col space-y-2">
+        <Label>Genres</Label>
+        <Select onValueChange={handleGenreSelect} value="">
+          <SelectTrigger>
+            <SelectValue placeholder="Select genres" />
+          </SelectTrigger>
+          <SelectContent>
+            {genres.map((genre) => (
+              <SelectItem key={genre.GenreId} value={genre.GenreName}>
+                {genre.GenreName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {selectedGenres.map((genre) => (
+            <Badge key={genre} variant="secondary">
+              {genre}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-1 h-4 w-4 p-0"
+                onClick={() => handleGenreRemove(genre)}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-col space-y-2">
+        <Label htmlFor="isbn">ISBN</Label>
+        <Input
+          id="isbn"
+          value={newBook.isbn}
+          onChange={(e) => setNewBook({ ...newBook, isbn: e.target.value })}
+        />
+      </div>
+      <div className="flex flex-col space-y-2">
+        <Label htmlFor="publicationDate">Publication Date</Label>
+        <Input
+          id="publicationDate"
+          type="date"
+          value={newBook.publicationDate}
+          onChange={(e) => setNewBook({ ...newBook, publicationDate: e.target.value })}
+        />
+      </div>
+      <div className="flex flex-col space-y-2">
+        <Label>Book Description</Label>
+        <Input
+          type="text"
+          value={newBook.description}
+          onChange={(e) => setNewBook({ ...newBook, description: e.target.value })}
+        />
+      </div>
+      <div className="flex flex-col space-y-2">
         <Label htmlFor="publisher">Publisher</Label>
         <Select
-          onValueChange={(value) =>
-            setNewBook({ ...newBook, publisherId: value })
-          }
+          onValueChange={(value) => setNewBook({ ...newBook, publisherId: value })}
           value={newBook.publisherId}
         >
           <SelectTrigger>
@@ -548,50 +537,49 @@ const fetchPublishers = async () => {
           </SelectContent>
         </Select>
       </div>
-              <div className="flex flex-col space-y-2">
-                <Label>Book Provider</Label>
-                <Select
-                  onValueChange={(value) =>
-                    setNewBook({ ...newBook, providerId: value })
-                  }
-                  value={newBook.providerId}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a provider" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {bookProviders.map((provider) => (
-                      <SelectItem
-                        key={provider.ProviderID}
-                        value={provider.ProviderID.toString()}
-                      >
-                        {provider.ProviderName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="copies">Copies</Label>
-                <Input
-                  id="copies"
-                  type="number"
-                  min="1"
-                  value={newBook.copies}
-                  onChange={(e) =>
-                    setNewBook({ ...newBook, copies: parseInt(e.target.value) })
-                  }
-                />
-              </div>
-            </div>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleAddBook} disabled={isLoading}>
-                {isLoading ? "Adding..." : "Add Book"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+      <div className="flex flex-col space-y-2">
+        <Label>Book Provider</Label>
+        <Select
+          onValueChange={(value) => setNewBook({ ...newBook, providerId: value })}
+          value={newBook.providerId}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a provider" />
+          </SelectTrigger>
+          <SelectContent>
+            {bookProviders.map((provider) => (
+              <SelectItem
+                key={provider.ProviderID}
+                value={provider.ProviderID.toString()}
+              >
+                {provider.ProviderName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex flex-col space-y-2">
+        <Label htmlFor="copies">Copies</Label>
+        <Input
+          id="copies"
+          type="number"
+          min="1"
+          value={newBook.copies}
+          onChange={(e) =>
+            setNewBook({ ...newBook, copies: parseInt(e.target.value) })
+          }
+        />
+      </div>
+    </div>
+    <AlertDialogFooter className="p-6 pt-0">
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction onClick={handleAddBook} disabled={isLoading}>
+        {isLoading ? "Adding..." : "Add Book"}
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+
       </div>
 
       {/* Loading State */}
@@ -673,225 +661,207 @@ const fetchPublishers = async () => {
       )}
 
       {/* Update Book Dialog */}
-      {selectedBook && (
-        <AlertDialog
-          open={!!selectedBook}
-          onOpenChange={() => setSelectedBook(null)}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Update Book</AlertDialogTitle>
-              <AlertDialogDescription>
-                Update the details of the book below.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="grid gap-4 py-4">
-              {/* Form fields for updating book */}
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="updateTitle">Title</Label>
-                <Input
-                  id="updateTitle"
-                  value={selectedBook?.Title || ""}
-                  onChange={(e) =>
-                    setSelectedBook((prev) =>
-                      prev ? { ...prev, Title: e.target.value } : null
-                    )
-                  }
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="updateAuthor">Author</Label>
-                <Input
-                  id="updateAuthor"
-                  value={selectedBook?.AuthorName || ""}
-                  onChange={(e) =>
-                    setSelectedBook((prev) =>
-                      prev ? { ...prev, AuthorName: e.target.value } : null
-                    )
-                  }
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Label>Genres</Label>
-                <Select onValueChange={handleUpdateGenreSelect} value="">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select genres" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {genres.map((genre) => (
-                      <SelectItem key={genre.GenreId} value={genre.GenreName}>
-                        {genre.GenreName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {updateSelectedGenres.map((genre) => (
-                    <Badge key={genre} variant="secondary">
-                      {genre}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="ml-1 h-4 w-4 p-0"
-                        onClick={() => handleUpdateGenreRemove(genre)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="updateIsbn">ISBN</Label>
-                <Input
-                  id="updateIsbn"
-                  value={selectedBook?.ISBN || ""}
-                  onChange={(e) =>
-                    setSelectedBook((prev) =>
-                      prev ? { ...prev, ISBN: e.target.value } : null
-                    )
-                  }
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-              <Label htmlFor="updateDescription">Description</Label>
-              <Textarea
-              id="updateDescription"
-              // type="text"
-             value={selectedBook?.Description || ""}
-                  onChange={(e) =>
-                    setSelectedBook((prev) =>
-                      prev ? { ...prev, Description: e.target.value } : null
-                    )
-                  }
-              />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="updatePublicationDate">Publication Date</Label>
-                <Input
-                  id="updatePublicationDate"
-                  type="date"
-                  value={selectedBook?.PublicationDate || ""}
-                  onChange={(e) =>
-                    setSelectedBook((prev) =>
-                      prev ? { ...prev, PublicationDate: e.target.value } : null
-                    )
-                  }
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Label>Book Provider</Label>
-                <Select
-                  onValueChange={(value) => {
-                    const provider = bookProviders.find(
-                      (p) => p.ProviderID.toString() === value
-                    );
-                    setSelectedBook((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            ProviderName: provider?.ProviderName || null,
-                          }
-                        : null
-                    );
-                  }}
-                  value={
-                    bookProviders
-                      .find(
-                        (p) => p.ProviderName === selectedBook?.ProviderName
-                      )
-                      ?.ProviderID.toString() || ""
-                  }
+     {selectedBook && (
+  <AlertDialog
+    open={!!selectedBook}
+    onOpenChange={() => setSelectedBook(null)}
+  >
+    <AlertDialogContent className="max-w-[70%] w-full max-h-[90vh] h-auto p-0 overflow-y-auto">
+      <AlertDialogHeader className="p-6 pb-0">
+        <AlertDialogTitle>Update Book</AlertDialogTitle>
+        <AlertDialogDescription>
+          Update the details of the book below.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <div className="grid gap-4 py-4 px-6">
+        {/* Form fields for updating book */}
+        <div className="flex flex-col space-y-2">
+          <Label htmlFor="updateTitle">Title</Label>
+          <Input
+            id="updateTitle"
+            value={selectedBook?.Title || ""}
+            onChange={(e) =>
+              setSelectedBook((prev) =>
+                prev ? { ...prev, Title: e.target.value } : null
+              )
+            }
+          />
+        </div>
+        <div className="flex flex-col space-y-2">
+          <Label htmlFor="updateAuthor">Author</Label>
+          <Input
+            id="updateAuthor"
+            value={selectedBook?.AuthorName || ""}
+            onChange={(e) =>
+              setSelectedBook((prev) =>
+                prev ? { ...prev, AuthorName: e.target.value } : null
+              )
+            }
+          />
+        </div>
+        <div className="flex flex-col space-y-2">
+          <Label>Genres</Label>
+          <Select onValueChange={handleUpdateGenreSelect} value="">
+            <SelectTrigger>
+              <SelectValue placeholder="Select genres" />
+            </SelectTrigger>
+            <SelectContent>
+              {genres.map((genre) => (
+                <SelectItem key={genre.GenreId} value={genre.GenreName}>
+                  {genre.GenreName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {updateSelectedGenres.map((genre) => (
+              <Badge key={genre} variant="secondary">
+                {genre}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-1 h-4 w-4 p-0"
+                  onClick={() => handleUpdateGenreRemove(genre)}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a provider" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {bookProviders.map((provider) => (
-                      <SelectItem
-                        key={provider.ProviderID}
-                        value={provider.ProviderID.toString()}
-                      >
-                        {provider.ProviderName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-                  <div className="flex flex-col space-y-2">
-                <Label>Book Publishers</Label>
-                <Select
-                  onValueChange={(value) => {
-                    const publisher = publishers.find(
-                      (p) => p.PublisherID.toString() === value
-                    );
-                    setSelectedBook((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                             PublisherName: publisher?.PublisherName || null,
-                          }
-                        : null
-                    );
-                  }}
-                  value={
-                    publishers
-                      .find(
-                        (p) => p.PublisherName === selectedBook?.PublisherName
-                      )
-                      ?.PublisherID.toString() || ""
-                  }
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-col space-y-2">
+          <Label htmlFor="updateIsbn">ISBN</Label>
+          <Input
+            id="updateIsbn"
+            value={selectedBook?.ISBN || ""}
+            onChange={(e) =>
+              setSelectedBook((prev) =>
+                prev ? { ...prev, ISBN: e.target.value } : null
+              )
+            }
+          />
+        </div>
+        <div className="flex flex-col space-y-2">
+          <Label htmlFor="updateDescription">Description</Label>
+          <Textarea
+            id="updateDescription"
+            value={selectedBook?.Description || ""}
+            onChange={(e) =>
+              setSelectedBook((prev) =>
+                prev ? { ...prev, Description: e.target.value } : null
+              )
+            }
+          />
+        </div>
+        <div className="flex flex-col space-y-2">
+          <Label htmlFor="updatePublicationDate">Publication Date</Label>
+          <Input
+            id="updatePublicationDate"
+            type="date"
+            value={selectedBook?.PublicationDate || ""}
+            onChange={(e) =>
+              setSelectedBook((prev) =>
+                prev ? { ...prev, PublicationDate: e.target.value } : null
+              )
+            }
+          />
+        </div>
+        <div className="flex flex-col space-y-2">
+          <Label>Book Provider</Label>
+          <Select
+            onValueChange={(value) => {
+              const provider = bookProviders.find(
+                (p) => p.ProviderID.toString() === value
+              );
+              setSelectedBook((prev) =>
+                prev
+                  ? { ...prev, ProviderName: provider?.ProviderName || null }
+                  : null
+              );
+            }}
+            value={
+              bookProviders
+                .find((p) => p.ProviderName === selectedBook?.ProviderName)
+                ?.ProviderID.toString() || ""
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a provider" />
+            </SelectTrigger>
+            <SelectContent>
+              {bookProviders.map((provider) => (
+                <SelectItem
+                  key={provider.ProviderID}
+                  value={provider.ProviderID.toString()}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a Publishers" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {publishers.map((publisher) => (
-                      <SelectItem
-                        key={publisher.PublisherID}
-                        value={publisher.PublisherID.toString()}
-                      >
-                        {publisher.PublisherName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="updateCopies">Copies</Label>
-                <Input
-                  id="updateCopies"
-                  type="number"
-                  min="1"
-                  value={selectedBook?.TotalCopies || 1}
-                  onChange={(e) => {
-                    const copies = parseInt(e.target.value, 10);
-                    setSelectedBook((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            TotalCopies: isNaN(copies) ? 1 : copies,
-                          }
-                        : null
-                    );
-                  }}
-                />
-              </div>
-            </div>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setSelectedBook(null)}>
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleUpdateBook}
-                disabled={isLoading}
-              >
-                {isLoading ? "Updating..." : "Update Book"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+                  {provider.ProviderName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-col space-y-2">
+          <Label>Book Publishers</Label>
+          <Select
+            onValueChange={(value) => {
+              const publisher = publishers.find(
+                (p) => p.PublisherID.toString() === value
+              );
+              setSelectedBook((prev) =>
+                prev
+                  ? { ...prev, PublisherName: publisher?.PublisherName || null }
+                  : null
+              );
+            }}
+            value={
+              publishers
+                .find((p) => p.PublisherName === selectedBook?.PublisherName)
+                ?.PublisherID.toString() || ""
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a Publisher" />
+            </SelectTrigger>
+            <SelectContent>
+              {publishers.map((publisher) => (
+                <SelectItem
+                  key={publisher.PublisherID}
+                  value={publisher.PublisherID.toString()}
+                >
+                  {publisher.PublisherName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-col space-y-2">
+          <Label htmlFor="updateCopies">Copies</Label>
+          <Input
+            id="updateCopies"
+            type="number"
+            min="1"
+            value={selectedBook?.TotalCopies || 1}
+            onChange={(e) => {
+              const copies = parseInt(e.target.value, 10);
+              setSelectedBook((prev) =>
+                prev ? { ...prev, TotalCopies: isNaN(copies) ? 1 : copies } : null
+              );
+            }}
+          />
+        </div>
+      </div>
+      <AlertDialogFooter className="p-6 pt-0">
+        <AlertDialogCancel onClick={() => setSelectedBook(null)}>
+          Cancel
+        </AlertDialogCancel>
+        <AlertDialogAction onClick={handleUpdateBook} disabled={isLoading}>
+          {isLoading ? "Updating..." : "Update Book"}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+)}
+
     </div>
   );
 }

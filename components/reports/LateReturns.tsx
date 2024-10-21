@@ -60,7 +60,7 @@ export default function LateReturners() {
   }, []);
 
   return (
-    <Card className="w-full  mx-auto shadow-xl">
+    <Card className="w-full h-[100% ] mx-auto shadow-xl">
       <CardHeader>
         <CardTitle>Late Returners</CardTitle>
         <CardDescription>Users with overdue book returns</CardDescription>

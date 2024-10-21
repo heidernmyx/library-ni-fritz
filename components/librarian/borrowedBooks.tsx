@@ -21,7 +21,7 @@ interface BorrowedBook {
   BorrowID: number
   BookID: number
   Title: string
-  Name: string
+  Fname: string
   AuthorName: string
   BorrowDate: string
   DueDate: string
@@ -120,7 +120,7 @@ export default function AdminBorrowedBooks() {
       .filter((book) => {
         const matchesSearch =
           book.Title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          book.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          book.Fname.toLowerCase().includes(searchTerm.toLowerCase()) ||
           book.AuthorName.toLowerCase().includes(searchTerm.toLowerCase())
         const matchesStatus =
           statusFilter === "all" || book.BorrowStatus === statusFilter
@@ -131,7 +131,7 @@ export default function AdminBorrowedBooks() {
           case "title":
             return a.Title.localeCompare(b.Title)
           case "user":
-            return a.Name.localeCompare(b.Name)
+            return a.Fname.localeCompare(b.Fname)
           case "borrowDate":
             return new Date(a.BorrowDate).getTime() - new Date(b.BorrowDate).getTime()
           case "dueDate":
@@ -221,7 +221,7 @@ export default function AdminBorrowedBooks() {
                   {filteredAndSortedBooks.map((book) => (
                     <TableRow key={book.BorrowID}>
                       <TableCell>{book.Title}</TableCell>
-                      <TableCell>{book.Name}</TableCell>
+                      <TableCell>{book.Fname}</TableCell>
                       <TableCell>{book.BorrowDate}</TableCell>
                       <TableCell>
                         {book.DueDate

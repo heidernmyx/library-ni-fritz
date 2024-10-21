@@ -17,7 +17,7 @@ interface ReservedBook {
   ReservationID: number
   BookID: number
   Title: string
-  Name: string
+  Fname: string
   AuthorName: string
   ReservationDate: string
   ExpirationDate: string
@@ -160,7 +160,7 @@ export default function AdminReservedBooks() {
       .filter((book) => {
         const matchesSearch =
           book.Title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          book.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          book.Fname.toLowerCase().includes(searchTerm.toLowerCase()) ||
           book.AuthorName.toLowerCase().includes(searchTerm.toLowerCase())
         const matchesStatus =
           statusFilter === "all" || book.ReservationStatus === statusFilter
@@ -171,7 +171,7 @@ export default function AdminReservedBooks() {
           case "title":
             return a.Title.localeCompare(b.Title)
           case "user":
-            return a.Name.localeCompare(b.Name)
+            return a.Fname.localeCompare(b.Fname)
           case "reservationDate":
             return new Date(a.ReservationDate).getTime() - new Date(b.ReservationDate).getTime()
           case "expirationDate":
@@ -263,7 +263,7 @@ export default function AdminReservedBooks() {
                   {filteredAndSortedBooks.map((book) => (
                     <TableRow key={book.ReservationID}>
                       <TableCell>{book.Title}</TableCell>
-                      <TableCell>{book.Name}</TableCell>
+                      <TableCell>{book.Fname}</TableCell>
                       <TableCell>{book.ReservationDate}</TableCell>
                       <TableCell>{book.ExpirationDate}</TableCell>
                       <TableCell>
