@@ -49,6 +49,8 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ sessionData }) => {
   const [status, setStatus] = useState<number>(1);
 
   useEffect(() => {
+    console.log(sessionData?.user.id);
+    console.log(sessionData?.user.usertype);
     const fetchUsers = async () => {
       if (sessionData?.user.id) {
         setUsersList(await list_users(Number(sessionData.user.id)));
