@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/router";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
 const formFieldSchema = z.object({
@@ -72,7 +73,6 @@ const LoginForm = () => {
   const credentialLogin: SubmitHandler<FormFields> = async (data) => {
     try {
       const { email, password, captchaAnswer, captchaNum1, captchaNum2 } = data;
-
       const expectedAnswer = captchaNum1 + captchaNum2;
 
       if (captchaAnswer !== expectedAnswer) {
@@ -96,9 +96,12 @@ const LoginForm = () => {
         redirect: false,
       });
 
-      if (response?.error) {
+      console.log("response ok: ",response?.ok);
+      console.log("response url: ",response?.url);
+      console.log("response error: ",response?.error);
+      if (response?.status != 200) {
         setError("root", {
-          message: response.error || "Invalid credentials",
+          message: "Invalid credentials!",
         });
         setCaptchaValid(null);
         generateCaptcha();
@@ -230,9 +233,10 @@ const LoginForm = () => {
 
             {errors.root && (
               <Alert className="mb-4">
-                <AlertTitle>Error</AlertTitle>
-                {errors.root.message}
+                <AlertTitle className="text-red-500">Error:</AlertTitle>
+                <AlertDescription className="font-semibold text-red-500">{errors.root.message}</AlertDescription>
               </Alert>
+            
             )}
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
