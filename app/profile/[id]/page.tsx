@@ -1,5 +1,6 @@
 'use client'
 
+
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -21,6 +22,11 @@ interface UserProps {
   RoleName: string;
   Email: string;
   Phone: string;
+  Street?: string;
+  City?: string;
+  State?: string;
+  Country?: string;
+  PostalCode?: string;
 }
 
 interface BorrowedBook {
@@ -69,20 +75,20 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       });
       if (response.data.success) {
         setUser(response.data.user);
-        fetchBorrowedBooks(response.data.user.RoleName, id);
+        fetchBorrowedBooks(response.data.user.RoleName, id); // Only fetch borrowed books if user data is successfully fetched
       } else {
         setError('Failed to fetch user details.');
       }
     } catch (err) {
+      // Catch real errors (e.g., network issues)
       setError('An error occurred while fetching the user data.');
     } finally {
-      setLoading(false);
+      setLoading(false); // Make sure to stop loading
     }
   };
 
   const fetchBorrowedBooks = async (role: string, userID: number) => {
     try {
-      setLoading(true);
       const formData = new FormData();
       formData.append("operation", "fetchBorrowedBooks");
       formData.append("json", JSON.stringify({ user_id: userID, role: role }));
@@ -98,8 +104,6 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       }
     } catch (err: any) {
       setError(err.response ? err.response.data.message : "An error occurred.");
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -127,26 +131,35 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                     <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${user?.Fname}`} />
                     <AvatarFallback>{user?.Fname.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <h1 className="text-2xl font-bold mb-2">{user?.Fname}</h1>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">{user?.RoleName}</p>
+                  <h1 className="text-2xl font-bold mb-2">{user?.Fname || "Unknown User"}</h1>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">{user?.RoleName || "Unknown Role"}</p>
                   <Button className="w-full mb-4 shadow-sm">Edit profile</Button>
                   <div className="w-full space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                    {user?.Email && (
+                    {user?.Email ? (
                       <p className="flex items-center gap-2">
                         <Mail size={16} />
                         <span>{user.Email}</span>
                       </p>
-                    )}
-                    {user?.Phone && (
+                    ) : null}
+                    {user?.Phone ? (
                       <p className="flex items-center gap-2">
                         <Phone size={16} />
                         <span>{user.Phone}</span>
                       </p>
+                    ) : null}
+                    {user?.Street || user?.City || user?.State || user?.Country ? (
+                      <p className="flex items-center gap-2">
+                        <MapPin size={16} />
+                        <span>
+                          {user?.Street || "No Address"}, {user?.City || ""}, {user?.State || ""}, {user?.Country || ""}
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="flex items-center gap-2">
+                        <MapPin size={16} />
+                        <span>Address not available</span>
+                      </p>
                     )}
-                    <p className="flex items-center gap-2">
-                      <MapPin size={16} />
-                      <span>Location</span>
-                    </p>
                     <p className="flex items-center gap-2">
                       <Calendar size={16} />
                       <span>Joined on {new Date().toLocaleDateString()}</span>
@@ -233,7 +246,6 @@ function ProfileSkeleton() {
         </div>
         <div className="lg:col-span-3 space-y-8">
           <Skeleton className="w-full h-64" />
-          <Skeleton className="w-full h-48" />
         </div>
       </div>
     </div>
