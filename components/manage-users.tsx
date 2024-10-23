@@ -227,7 +227,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ sessionData }) => {
                         </>
                       : <>
                           <DropdownMenuItem onClick={() => restoreUser(user.UserID)}>Restore</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => deleteUser(user.UserID)}>Delete Permanently</DropdownMenuItem>
+                          {/* <DropdownMenuItem onClick={() => deleteUser(user.UserID)}>Delete Permanently</DropdownMenuItem> */}
                         </>
                       }
                     </DropdownMenuContent>
