@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AlertCircle, Book, MapPin, Mail, Phone, Calendar, Bell } from 'lucide-react'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface ProfilePageProps {
   params: {
@@ -204,31 +205,34 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                 <CardTitle className="text-xl">Notifications</CardTitle>
               </CardHeader>
               <CardContent>
-                {notifications.length > 0 ? (
-                  <ul className="space-y-4">
-                    {notifications.map((notification, index) => (
-                      <li key={index} className="p-4 rounded-lg shadow-md bg-gray-50 dark:bg-gray-800">
-                        <div className="flex items-start gap-4">
-                          <Bell className="mt-1 text-gray-600 dark:text-gray-400" size={20} />
-                          <div className="flex-1">
-                            <p className="font-medium">{notification.Message}</p>
-                            <div className="flex items-center justify-between mt-2">
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
-                                {new Date(notification.DateSent).toLocaleDateString()}
-                              </p>
-                              <Badge variant="outline" className="shadow-sm">
-                                {notification.NotificationTypeName}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No notifications found.</p>
-                )}
-              </CardContent>
+        {notifications.length > 0 ? (
+          <ScrollArea className="h-[300px] pr-4">
+            <ul className="space-y-4">
+              {notifications.map((notification, index) => (
+                <li key={index} className="p-4 rounded-lg shadow-md bg-gray-50 dark:bg-gray-800">
+                  <div className="flex items-start gap-4">
+                    <Bell className="mt-1 text-gray-600 dark:text-gray-400" size={20} />
+                    <div className="flex-1">
+                      <p className="font-medium">{notification.Message}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {new Date(notification.DateSent).toLocaleDateString()}
+                        </p>
+                        <Badge variant="outline" className="shadow-sm">
+                          {notification.NotificationTypeName}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </ScrollArea>
+        ) : (
+          <p>No notifications found.</p>
+        )}
+      </CardContent>
+
             </Card>
           </div>
         </div>
