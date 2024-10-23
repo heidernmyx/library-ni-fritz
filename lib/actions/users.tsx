@@ -43,6 +43,7 @@ export const updateUser = async (data: any) => {
     method: "POST",
     data: formData
   })
+  
   alert(response.data.message)
   // return response.data;
 }

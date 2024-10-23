@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface Genre {
   GenreId: number
   GenreName: string
+  isArchived: number
 }
 
 export default function GenreManagement() {
@@ -113,6 +114,24 @@ export default function GenreManagement() {
     }
   }
 
+  const restoreGenre = async (genreID: number) => {
+    try {
+      const formData = new FormData()
+      formData.append("operation", "restoreGenre")
+      formData.append("json", JSON.stringify({ genreID }))
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/genre.php`, formData)
+      if (response.data.success) {
+        toast({ title: "Success", description: response.data.message })
+        fetchGenres()
+        fetchArchivedGenres()
+      } else {
+        toast({ title: "Error", description: response.data.message, variant: "destructive" })
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to archive genre", variant: "destructive" })
+    }
+  }
+
   const sortGenres = (genresToSort: Genre[]) => {
     if (!sortOption) return genresToSort
 
@@ -151,6 +170,7 @@ export default function GenreManagement() {
             <TabsTrigger value="active">Active Genres</TabsTrigger>
             <TabsTrigger value="archived">Archived Genres</TabsTrigger>
           </TabsList>
+          
           <div className="mb-4 flex flex-col sm:flex-row gap-4">
             <div className="relative flex-grow">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -173,7 +193,7 @@ export default function GenreManagement() {
             </Select>
           </div>
           <TabsContent value="active">
-            <div className="mb-4 justify-between">
+            <div className="flex mb-4 justify-between">
               <Input
                 type="text"
                 placeholder="New Genre Name"
@@ -238,6 +258,7 @@ export default function GenreManagement() {
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Name</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -252,6 +273,7 @@ export default function GenreManagement() {
                       <TableRow key={genre.GenreId}>
                         <TableCell>{genre.GenreId}</TableCell>
                         <TableCell>{genre.GenreName}</TableCell>
+                        <TableCell onClick={() => restoreGenre(genre.GenreId)}><Button className="bg-green-400 hover:bg-muted-foreground">Restore</Button></TableCell>
                       </TableRow>
                     ))
                   )}

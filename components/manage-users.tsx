@@ -31,6 +31,7 @@ import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Label } from './ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Link from 'next/link';
 
 interface ManageUsersProps {
   sessionData: Session | null;
@@ -222,6 +223,9 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ sessionData }) => {
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       { status == 1 ? 
                         <>
+                          <DropdownMenuItem asChild>
+                            <Link target='_blank' href={`/profile/${user.UserID}`}>View in page</Link>
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleManage(user)}>Edit</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => archiveUser(user.UserID)}>Archive</DropdownMenuItem>
                         </>
