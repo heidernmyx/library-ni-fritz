@@ -35,7 +35,7 @@ export default function BookProvidersList() {
   const [selectedProvider, setSelectedProvider] = useState<BookProvider | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [sessionData, setSessionData] = useState(null);
   useEffect(() => {
     fetchProviders().then((data) => {
       setProviders(data);
