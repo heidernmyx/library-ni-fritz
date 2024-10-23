@@ -215,7 +215,7 @@ export default function UserLayout({
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex justify-center space-x-4 mt-6">
-                  <Link target='_blank' href={`profile/${sessionData?.user.id}`}>
+                  <Link target='_blank' href={`../profile/${sessionData?.user.id}`}>
                     <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
                       View Profile
                     </Button>
