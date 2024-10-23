@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface Genre {
   GenreId: number
   GenreName: string
+  IsArchived: number
 }
 
 export default function GenreManagement() {
@@ -113,6 +114,25 @@ export default function GenreManagement() {
     }
   }
 
+  const restoreGenre = async (genreID: number) => {
+    try {
+      const formData = new FormData()
+      formData.append("operation", "restoreGenre")
+      formData.append("json", JSON.stringify({ genreID }))
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/genre.php`, formData)
+      if (response.data.success) {
+        toast({ title: "Success", description: response.data.message })
+        fetchGenres()
+        fetchArchivedGenres()
+      } else {
+        toast({ title: "Error", description: response.data.message, variant: "destructive" })
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to archive genre", variant: "destructive" })
+    }
+  }
+
+
   const sortGenres = (genresToSort: Genre[]) => {
     if (!sortOption) return genresToSort
 
@@ -174,14 +194,16 @@ export default function GenreManagement() {
           </div>
           <TabsContent value="active">
             <div className="mb-4 justify-between">
-              <Input
-                type="text"
-                placeholder="New Genre Name"
-                value={newGenreName}
-                onChange={(e) => setNewGenreName(e.target.value)}
-                className="mr-2"
-              />
-              <Button onClick={addGenre}>Add Genre</Button>
+              <div className="flex space-x-2 justify-between">
+                <Input
+                  type="text"
+                  placeholder="New Genre Name"
+                  value={newGenreName}
+                  onChange={(e) => setNewGenreName(e.target.value)}
+                  className="mr-2"
+                />
+                <Button className="bg-green-400 hover:bg-green-600" onClick={addGenre}>Add Genre</Button>
+              </div>
             </div>
             <ScrollArea className="h-[400px] rounded-md border">
               <Table>
@@ -200,7 +222,7 @@ export default function GenreManagement() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredAndSortedGenres.map((genre) => (
+                    filteredAndSortedGenres.filter(genre => genre.IsArchived == 0).map((genre) => (
                       <TableRow key={genre.GenreId}>
                         <TableCell>{genre.GenreId}</TableCell>
                         <TableCell>{genre.GenreName}</TableCell>
@@ -238,6 +260,7 @@ export default function GenreManagement() {
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Name</TableHead>
+                    <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -252,6 +275,9 @@ export default function GenreManagement() {
                       <TableRow key={genre.GenreId}>
                         <TableCell>{genre.GenreId}</TableCell>
                         <TableCell>{genre.GenreName}</TableCell>
+                        <TableCell>
+                          <Button onClick={() => restoreGenre(genre.GenreId)}>Restore</Button>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
