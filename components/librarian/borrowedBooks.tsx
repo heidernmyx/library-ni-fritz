@@ -16,6 +16,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "../ui/label"
 
 interface BorrowedBook {
   BorrowID: number
@@ -162,12 +163,43 @@ export default function AdminBorrowedBooks() {
       </Alert>
     )
   }
+  const handleSendReminder = async (reminderType: string) => { 
+    try { 
+      const formData = new FormData()
+      formData.append("operation", reminderType)
+     
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/books.php`,
+        formData
+      )
+      if (response.data.success) {
+        toast({
+          title: "Reminder Sent",
+          description: "The reminder has been sent successfully.",
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: response.data.message || "Failed to send the reminder.",
+          variant: "destructive",
+        })
+      }
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.response
+          ? err.response.data.message
+          : "An error occurred while sending the reminder.",
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
     <div className="space-y-6 w-[90%] mr-8 mx-auto shadow-xl">
       <Card className="min-h-[90vh]">
         <CardHeader>
-          <CardTitle className="text-2xl">Borrowed Books</CardTitle>
+          <CardTitle className="text-4xl  ">Borrowed Books</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 mb-4">
@@ -202,7 +234,20 @@ export default function AdminBorrowedBooks() {
                 <SelectItem value="borrowDate">Borrow Date</SelectItem>
                 <SelectItem value="dueDate">Due Date</SelectItem>
               </SelectContent>
+
             </Select>
+            <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline">Send Reminders</Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-fit bg-transparent border-none">
+        <div className="flex flex-col justify-evenly gap-2  ">
+                  <Button className="w-fit" onClick={()=> handleSendReminder("sendReservationExpiryReminders")}>Send Reservation Expiry</Button>
+                  <Button className="w-fit" onClick={() => handleSendReminder("sendDueDateReminders")}>Send Due Date Reminder</Button>
+                  <Button className="w-fit" onClick={()=> handleSendReminder("sendOverdueNotices")}>Send Overdue Reminder</Button> 
+        </div>
+      </PopoverContent>
+    </Popover>
           </div>
           {filteredAndSortedBooks.length > 0 ? (
             <ScrollArea className="h-[calc(90vh-200px)]">
