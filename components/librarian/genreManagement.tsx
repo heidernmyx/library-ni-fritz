@@ -15,11 +15,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface Genre {
   GenreId: number
   GenreName: string
+  IsArchived: number
 }
 
 export default function GenreManagement() {
   const [genres, setGenres] = useState<Genre[]>([])
-  const [archivedGenres, setArchivedGenres] = useState<Genre[]>([])
   const [newGenreName, setNewGenreName] = useState("")
   const [editingGenre, setEditingGenre] = useState<Genre | null>(null)
   const [loading, setLoading] = useState(false)
@@ -29,7 +29,6 @@ export default function GenreManagement() {
 
   useEffect(() => {
     fetchGenres()
-    fetchArchivedGenres()
   }, [])
 
   const fetchGenres = async () => {
@@ -41,19 +40,6 @@ export default function GenreManagement() {
       setGenres(response.data)
     } catch (error) {
       toast({ title: "Error", description: "Failed to fetch genres", variant: "destructive" })
-    }
-    setLoading(false)
-  }
-
-  const fetchArchivedGenres = async () => {
-    setLoading(true)
-    try {
-      const formData = new FormData()
-      formData.append("operation", "fetchArchivedGenres")
-      const response = await axios.post("http://localhost/library_api/php/genre.php", formData)
-      setArchivedGenres(response.data)
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to fetch archived genres", variant: "destructive" })
     }
     setLoading(false)
   }
@@ -104,7 +90,6 @@ export default function GenreManagement() {
       if (response.data.success) {
         toast({ title: "Success", description: response.data.message })
         fetchGenres()
-        fetchArchivedGenres()
       } else {
         toast({ title: "Error", description: response.data.message, variant: "destructive" })
       }
@@ -130,17 +115,17 @@ export default function GenreManagement() {
 
   const filteredAndSortedGenres = useMemo(() => {
     const filtered = genres.filter((genre) =>
-      genre.GenreName.toLowerCase().includes(searchTerm.toLowerCase())
+      genre.GenreName.toLowerCase().includes(searchTerm.toLowerCase()) && genre.IsArchived === 0
     )
     return sortGenres(filtered)
   }, [genres, searchTerm, sortOption])
 
   const filteredAndSortedArchivedGenres = useMemo(() => {
-    const filtered = archivedGenres.filter((genre) =>
-      genre.GenreName.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = genres.filter((genre) =>
+      genre.GenreName.toLowerCase().includes(searchTerm.toLowerCase()) && genre.IsArchived === 1
     )
     return sortGenres(filtered)
-  }, [archivedGenres, searchTerm, sortOption])
+  }, [genres, searchTerm, sortOption])
 
   return (
     <div className="container mx-auto p-4">
