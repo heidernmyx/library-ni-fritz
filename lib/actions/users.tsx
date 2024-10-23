@@ -30,7 +30,8 @@ export const addUser = async (data: any) => {
     method: "POST",
     data: formData
   })
-  return response.data
+  alert(response.data.message)
+  // return response.data
 }
 
 export const updateUser = async (data: any) => {
@@ -42,7 +43,8 @@ export const updateUser = async (data: any) => {
     method: "POST",
     data: formData
   })
-  return response.data;
+  alert(response.data.message)
+  // return response.data;
 }
 
 export const archiveUser = async (data: any) => {
