@@ -7,7 +7,7 @@ import LateReturners from "@/components/reports/LateReturns";
 
 export default function Reports() {
   return (
-    <div className="w-[80%] h-[90%] flex flex-col bg-white p-6 rounded-md">
+    <div className=" h-[90%] flex flex-col bg-white p-6 rounded-md">
       <h1 className="text-5xl font-bold p-4 m-3">Reports</h1>
       <Tabs defaultValue="popular" className="w-full  flex flex-col rounded-md">
         <div className="sticky top-0 z-10 bg-background shadow-md w-fit">
