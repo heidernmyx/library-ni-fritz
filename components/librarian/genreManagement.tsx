@@ -60,22 +60,39 @@ export default function GenreManagement() {
   }
 
   const addGenre = async () => {
-    try {
-      const formData = new FormData()
-      formData.append("operation", "addGenre")
-      formData.append("json", JSON.stringify({ genreName: newGenreName }))
-      const response = await axios.post("http://localhost/library_api/php/genre.php", formData)
-      if (response.data.success) {
-        toast({ title: "Success", description: response.data.message })
-        fetchGenres()
-        setNewGenreName("")
-      } else {
-        toast({ title: "Error", description: response.data.message, variant: "destructive" })
-      }
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to add genre", variant: "destructive" })
+  try {
+    const formData = new FormData();
+    formData.append("operation", "addGenre");
+    formData.append("json", JSON.stringify({ genreName: newGenreName }));
+
+    const response = await axios.post("http://localhost/library_api/php/genre.php", formData);
+
+    // Check if the status is success
+    if (response.data.status === "success") {
+      // Use the data from the response to give detailed feedback
+      const addedGenre = response.data.data;
+      toast({
+        title: "Success",
+        description: `Genre "${addedGenre.GenreName}" added successfully with ID ${addedGenre.GenreID}`,
+      });
+      fetchGenres(); // Refresh the genres list
+      setNewGenreName(""); // Clear the input field
+    } else {
+      toast({
+        title: "Error",
+        description: response.data.message || "Failed to add genre.",
+        variant: "destructive",
+      });
     }
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "Failed to add genre. Please try again.",
+      variant: "destructive",
+    });
   }
+};
+
 
   const updateGenre = async ($genreId: any, $genreName: any) => {
     if (!editingGenre) return
