@@ -76,6 +76,11 @@ const navItems = [
     href: "/admin_dashboard/genre",
     label: "Genre Management",
     icon:AlbumIcon,
+  },
+  {
+    href: "/admin_dashboard/publisher",
+    label: "Publisher",
+    icon:Package,
   }
 ];
 
