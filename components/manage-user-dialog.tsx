@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Session } from 'next-auth';
+import { useForm } from 'react-hook-form';
 
 interface ManageUserDialogProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ interface ManageUserDialogProps {
 }
 
 export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, user, session }: ManageUserDialogProps) {
+
+  const { } = useForm<UserFormProps>();
 
   const [formData, setFormData] = useState<UserFormProps>({
     UserID: 0,
@@ -45,7 +48,6 @@ export default function ManageUserDialog({ isOpen, onClose, onSave, onUpdate, us
       // Map RoleName to RoleID and GenderName to GenderID
       const roleID = user.RoleName === "Admin" ? 1 : user.RoleName === "Librarian" ? 2 : 3; // Example mapping
       const genderID = user.GenderName === "Male" ? 1 : user.GenderName === "Female" ? 2 : 3; // Example mapping
-      
       // Set form data with mapped RoleID and GenderID
       setFormData({
         UserID: user.UserID,

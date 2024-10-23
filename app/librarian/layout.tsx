@@ -341,7 +341,7 @@ export default function LibrarianLayout({
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex justify-center space-x-4 mt-6">
-                  <Link href="/librarian/profile">
+                  <Link target='_blank' href={`/profile/?id=${sessionData?.user.id}`}>
                     <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
                       View Profile
                     </Button>

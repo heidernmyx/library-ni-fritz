@@ -87,3 +87,15 @@ export const deleteUser = async (data: any) => {
   })
   alert(result.data == 1 ? "User deleted permanently." : "Failed to delete user.")
 }
+
+export const fetchUser = async (id: number) => {
+  const response = await axios.get<UserProps>(`${process.env.NEXT_PUBLIC_API_URL}/users.php`,{
+    params: {
+      operation: "fetch_user",
+      json: JSON.stringify({ UserID: id })
+    }
+  })
+  console.log(response.data);
+  // alert(response.data)
+  // return response.data;
+}

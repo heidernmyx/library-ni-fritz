@@ -124,7 +124,7 @@ export default function BookLibrary() {
       }
     }
     fetchSession();
-  })
+  }, [])
   // Fetch functions and useEffect
   useEffect(() => {
     fetchGenres();
@@ -157,12 +157,13 @@ const fetchPublishers = async () => {
       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     )
     setPublishers(response.data);
-  }catch(error){
-       toast({
-        title: "Error",
-        description: "Failed to fetch book publishers.",
-        variant: "destructive",
-       })
+  }
+  catch(error){
+    toast({
+      title: "Error",
+      description: "Failed to fetch book publishers.",
+      variant: "destructive",
+    })
   }
 }
 
