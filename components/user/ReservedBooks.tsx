@@ -72,7 +72,7 @@ export default function ReservedBooks() {
   }, []);
 
   const fetchReservedBooks = async () => {
-    if (!sessionData) return; // Wait for sessionData to load
+    if (!sessionData) return; 
     try {
       setLoading(true);
       const formData = new FormData();
@@ -103,7 +103,6 @@ export default function ReservedBooks() {
 
   useEffect(() => {
     fetchReservedBooks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionData]);
 
   const handleBorrow = async (reservationId: number) => {

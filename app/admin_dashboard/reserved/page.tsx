@@ -1,7 +1,7 @@
 import AdminReservedBooks from "@/components/librarian/reservedBooks";
 import React from "react";
 
-const SettingsPage = () => {
+const ReservedBooksPage = () => {
   return (
     <>
       <AdminReservedBooks />
@@ -9,4 +9,4 @@ const SettingsPage = () => {
   );
 };
 
-export default SettingsPage;
+export default ReservedBooksPage;
