@@ -24,7 +24,7 @@ import ManageProviderDialog from '@/components/manage-provider-dialog';
 import ViewProvidedBookDialog from './view-provided-book-dialog';
 import { handleViewDialog } from '@/lib/actions/book-provider'
 import { Input } from './ui/input';
-
+import { Session } from 'next-auth';
 type SortKey = keyof BookProvider;
 
 export default function BookProvidersList() {
@@ -35,7 +35,24 @@ export default function BookProvidersList() {
   const [selectedProvider, setSelectedProvider] = useState<BookProvider | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sessionData, setSessionData] = useState(null);
+  const [sessionData, setSessionData] = useState<Session | null>(null);
+
+
+  useEffect(() => { 
+    const fetchSession = async () => { 
+      try {
+        const response = await fetch('/api/auth/session');
+        const data = await response.json();
+        setSessionData(data);
+
+      } catch (error) {
+        
+      }
+    }
+
+    fetchSession();
+  },[])
+
   useEffect(() => {
     fetchProviders().then((data) => {
       setProviders(data);
@@ -81,6 +98,19 @@ export default function BookProvidersList() {
         provider.Email.toLowerCase().includes(value)
     );
     setFilteredProviders(filtered);
+  };
+
+  const handleAddProvider = async (provider: BookProvider) => { 
+     if (sessionData) {
+      const providerWithUserId = { ...provider, user_id: sessionData.user.id }; 
+      await addProvider(providerWithUserId);
+    }
+  }
+   const handleUpdateProvider = async (provider: BookProvider) => {
+    if (sessionData) {
+      const providerWithUserId = { ...provider, user_id: sessionData.user.id };
+      await updateProvider(providerWithUserId); 
+    }
   };
 
   return (
@@ -162,8 +192,8 @@ export default function BookProvidersList() {
       <ManageProviderDialog
         isOpen={isManageDialogOpen}
         onClose={() => setIsManageDialogOpen(false)}
-        onSave={addProvider}
-        onUpdate={updateProvider}
+        onSave={handleAddProvider}
+        onUpdate={handleUpdateProvider}
         provider={selectedProvider}
       />
       <ViewProvidedBookDialog 

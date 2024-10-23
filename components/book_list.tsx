@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, use } from "react";
 import axios from "axios";
 import {
   AlertDialog,
@@ -50,6 +50,7 @@ import {
   Search,
   Library
 } from "lucide-react";
+import { Session } from "next-auth";
 
 type BookType = {
   BookID: number;
@@ -106,13 +107,24 @@ export default function BookLibrary() {
   const [updateSelectedGenres, setUpdateSelectedGenres] = useState<string[]>(
     []
   );
-  //  const [selectedPublisher, setSelectedPublisher] = useState<string | null>("");
-  // const [selectedProvider, setSelectedProvider] = useState<string | null>(""); // Add selected provider
- 
-  const [sortOption, setSortOption] = useState<string | undefined>(null); // State for sorting
+  const [sessionData, setSessionData] = useState<Session|null>(null);
+  const [sortOption, setSortOption] = useState<string | undefined>(); // State for sorting
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
+  useEffect(() => { 
+    const fetchSession = async () => { 
+      try {
+        const response = await fetch('/api/auth/session');
+        const data = await response.json();
+        setSessionData(data);
+
+      } catch (error) {
+        console.log("error getting session")
+      }
+    }
+    fetchSession();
+  })
   // Fetch functions and useEffect
   useEffect(() => {
     fetchGenres();
@@ -249,6 +261,7 @@ const fetchPublishers = async () => {
           provider_id: newBook.providerId,
           publisher_id: newBook.publisherId,
           copies: newBook.copies,
+          user_id: sessionData!.user.id,
         }),
       };
 
@@ -318,6 +331,7 @@ const fetchPublishers = async () => {
         provider_id: provider ? provider.ProviderID : null,
         publisher_id: publisher ? publisher.PublisherID : null,
         copies: selectedBook.TotalCopies,
+        user_id: sessionData!.user.id,
       }),
     };
 
@@ -413,7 +427,6 @@ const fetchPublishers = async () => {
             <Select
             onValueChange={(value) => setSortOption(value)}
             value={sortOption}
-            className="w-48"
           >
             <SelectTrigger>
               <SelectValue placeholder="Sort by" />

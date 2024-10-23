@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
+import { Session } from "next-auth"
 
 interface ReservedBook {
   ReservationID: number
@@ -40,6 +41,7 @@ export default function AdminReservedBooks() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [sortOption, setSortOption] = useState<string>("title")
   const { toast } = useToast()
+  const [sessionData, setSessionData] = useState<Session | null>(null);
 
   useEffect(() => {
     const fetchReservedBooks = async () => {
@@ -97,6 +99,19 @@ export default function AdminReservedBooks() {
     fetchStatuses()
   }, [])
 
+  useEffect(() => { 
+    const fetchSession = async () => { 
+      try {
+        const response = await fetch('/api/auth/session');
+        const data = await response.json();
+        setSessionData(data);
+
+      } catch (error) {
+        console.log("error getting session")
+      }
+    }
+    fetchSession();
+  },[])
   const handleStatusChange = async (
     reservationId: number,
     newStatusId: number
@@ -109,6 +124,7 @@ export default function AdminReservedBooks() {
         JSON.stringify({
           reservation_id: reservationId,
           status_id: newStatusId,
+          user_id: sessionData!.user.id
         })
       )
 
