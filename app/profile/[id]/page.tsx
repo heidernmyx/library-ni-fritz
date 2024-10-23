@@ -21,6 +21,11 @@ interface UserProps {
   RoleName: string;
   Email: string;
   Phone: string;
+  Street: string;
+  City: string;
+  State: string;
+  Country: string;
+  PostalCode: string;
 }
 
 interface BorrowedBook {
@@ -144,8 +149,11 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                       </p>
                     )}
                     <p className="flex items-center gap-2">
-                      <MapPin size={16} />
-                      <span>Location</span>
+                    <div>  <MapPin size={16} /></div>
+                    <span>
+  {user?.Street}, {user?.City}, {user?.State}, {user?.Country} - {user?.PostalCode}
+</span>
+
                     </p>
                     <p className="flex items-center gap-2">
                       <Calendar size={16} />
