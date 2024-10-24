@@ -21,7 +21,9 @@ interface Publisher {
   Country: string;
   PostalCode: string;
   IsActive: boolean;
-  user_id: number;
+    user_id: number;
+    ContactID: number;
+    AddressID: number;
 }
 
 type SortKey = keyof Pick<Publisher, "PublisherName" | "Phone" | "Email" | "City">;
@@ -43,7 +45,8 @@ export default function PublisherManager() {
     City: '',
     State: '',
     Country: '',
-    PostalCode: '',
+      PostalCode: '',
+    
   });
 
   useEffect(() => {
@@ -110,7 +113,8 @@ export default function PublisherManager() {
     formData.append('operation', operation); // Add the operation parameter
     formData.append(
       'json',
-      JSON.stringify({
+        JSON.stringify({
+        PublisherID: selectedPublisher?.PublisherID,
         PublisherName: formValues.PublisherName,
         Phone: formValues.Phone,
         Email: formValues.Email,
@@ -119,7 +123,10 @@ export default function PublisherManager() {
         State: formValues.State,
         Country: formValues.Country,
         PostalCode: formValues.PostalCode,
-        user_id: sessionData.user.id, // Include user_id in the JSON payload
+        user_id: sessionData.user.id,
+        ContactID: selectedPublisher?.ContactID,
+        AddressID: selectedPublisher?.AddressID,
+         // Include user_id in the JSON payload
       })
     );
 
